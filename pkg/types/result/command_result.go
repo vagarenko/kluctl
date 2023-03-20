@@ -1,6 +1,7 @@
-package types
+package result
 
 import (
+	"github.com/kluctl/kluctl/v2/pkg/types"
 	"github.com/kluctl/kluctl/v2/pkg/types/k8s"
 	"github.com/kluctl/kluctl/v2/pkg/utils/uo"
 )
@@ -31,14 +32,14 @@ type DeploymentError struct {
 }
 
 type CommandResult struct {
-	NewObjects     []*RefAndObject   `yaml:"newObjects,omitempty"`
-	ChangedObjects []*ChangedObject  `yaml:"changedObjects,omitempty"`
-	HookObjects    []*RefAndObject   `yaml:"hookObjects,omitempty"`
-	OrphanObjects  []k8s.ObjectRef   `yaml:"orphanObjects,omitempty"`
-	DeletedObjects []k8s.ObjectRef   `yaml:"deletedObjects,omitempty"`
-	Errors         []DeploymentError `yaml:"errors,omitempty"`
-	Warnings       []DeploymentError `yaml:"warnings,omitempty"`
-	SeenImages     []FixedImage      `yaml:"seenImages,omitempty"`
+	NewObjects     []*RefAndObject    `yaml:"newObjects,omitempty"`
+	ChangedObjects []*ChangedObject   `yaml:"changedObjects,omitempty"`
+	HookObjects    []*RefAndObject    `yaml:"hookObjects,omitempty"`
+	OrphanObjects  []k8s.ObjectRef    `yaml:"orphanObjects,omitempty"`
+	DeletedObjects []k8s.ObjectRef    `yaml:"deletedObjects,omitempty"`
+	Errors         []DeploymentError  `yaml:"errors,omitempty"`
+	Warnings       []DeploymentError  `yaml:"warnings,omitempty"`
+	SeenImages     []types.FixedImage `yaml:"seenImages,omitempty"`
 }
 
 type ValidateResultEntry struct {

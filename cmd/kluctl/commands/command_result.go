@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"github.com/kluctl/kluctl/v2/pkg/diff"
 	"github.com/kluctl/kluctl/v2/pkg/status"
-	"github.com/kluctl/kluctl/v2/pkg/types"
 	"github.com/kluctl/kluctl/v2/pkg/types/k8s"
+	"github.com/kluctl/kluctl/v2/pkg/types/result"
 	"github.com/kluctl/kluctl/v2/pkg/utils"
 	"github.com/kluctl/kluctl/v2/pkg/yaml"
 	"io"
@@ -15,7 +15,7 @@ import (
 	"strings"
 )
 
-func formatCommandResultText(cr *types.CommandResult) string {
+func formatCommandResultText(cr *result.CommandResult) string {
 	buf := bytes.NewBuffer(nil)
 
 	if len(cr.Warnings) != 0 {
@@ -80,7 +80,7 @@ func prettyObjectRefs(buf io.StringWriter, refs []k8s.ObjectRef) {
 	}
 }
 
-func prettyErrors(buf io.StringWriter, errors []types.DeploymentError) {
+func prettyErrors(buf io.StringWriter, errors []result.DeploymentError) {
 	for _, e := range errors {
 		prefix := ""
 		if s := e.Ref.String(); s != "" {
@@ -90,7 +90,7 @@ func prettyErrors(buf io.StringWriter, errors []types.DeploymentError) {
 	}
 }
 
-func prettyChanges(buf io.StringWriter, ref k8s.ObjectRef, changes []types.Change) {
+func prettyChanges(buf io.StringWriter, ref k8s.ObjectRef, changes []result.Change) {
 	_, _ = buf.WriteString(fmt.Sprintf("Diff for object %s\n", ref.String()))
 
 	var t utils.PrettyTable
@@ -103,7 +103,7 @@ func prettyChanges(buf io.StringWriter, ref k8s.ObjectRef, changes []types.Chang
 	_, _ = buf.WriteString(s)
 }
 
-func formatCommandResultYaml(cr *types.CommandResult) (string, error) {
+func formatCommandResultYaml(cr *result.CommandResult) (string, error) {
 	b, err := yaml.WriteYamlString(cr)
 	if err != nil {
 		return "", err
@@ -111,7 +111,7 @@ func formatCommandResultYaml(cr *types.CommandResult) (string, error) {
 	return b, nil
 }
 
-func formatCommandResult(cr *types.CommandResult, format string) (string, error) {
+func formatCommandResult(cr *result.CommandResult, format string) (string, error) {
 	switch format {
 	case "text":
 		return formatCommandResultText(cr), nil
@@ -122,7 +122,7 @@ func formatCommandResult(cr *types.CommandResult, format string) (string, error)
 	}
 }
 
-func prettyValidationResults(buf io.StringWriter, results []types.ValidateResultEntry) {
+func prettyValidationResults(buf io.StringWriter, results []result.ValidateResultEntry) {
 	var t utils.PrettyTable
 	t.AddRow("Object", "Message")
 
@@ -133,7 +133,7 @@ func prettyValidationResults(buf io.StringWriter, results []types.ValidateResult
 	_, _ = buf.WriteString(s)
 }
 
-func formatValidateResultText(vr *types.ValidateResult) string {
+func formatValidateResultText(vr *result.ValidateResult) string {
 	buf := bytes.NewBuffer(nil)
 
 	if len(vr.Warnings) != 0 {
@@ -159,7 +159,7 @@ func formatValidateResultText(vr *types.ValidateResult) string {
 	return buf.String()
 }
 
-func formatValidateResultYaml(vr *types.ValidateResult) (string, error) {
+func formatValidateResultYaml(vr *result.ValidateResult) (string, error) {
 	b, err := yaml.WriteYamlString(vr)
 	if err != nil {
 		return "", err
@@ -167,7 +167,7 @@ func formatValidateResultYaml(vr *types.ValidateResult) (string, error) {
 	return string(b), nil
 }
 
-func formatValidateResult(vr *types.ValidateResult, format string) (string, error) {
+func formatValidateResult(vr *result.ValidateResult, format string) (string, error) {
 	switch format {
 	case "text":
 		return formatValidateResultText(vr), nil
@@ -202,7 +202,7 @@ func outputHelper(ctx context.Context, output []string, cb func(format string) (
 	return nil
 }
 
-func outputCommandResult(ctx context.Context, output []string, noObfuscate bool, cr *types.CommandResult) error {
+func outputCommandResult(ctx context.Context, output []string, noObfuscate bool, cr *result.CommandResult) error {
 	status.Flush(ctx)
 
 	if !noObfuscate {
@@ -220,7 +220,7 @@ func outputCommandResult(ctx context.Context, output []string, noObfuscate bool,
 	})
 }
 
-func outputValidateResult(ctx context.Context, output []string, vr *types.ValidateResult) error {
+func outputValidateResult(ctx context.Context, output []string, vr *result.ValidateResult) error {
 	status.Flush(ctx)
 
 	return outputHelper(ctx, output, func(format string) (string, error) {
