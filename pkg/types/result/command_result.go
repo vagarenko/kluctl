@@ -15,10 +15,8 @@ type Change struct {
 }
 
 type ChangedObject struct {
-	Ref       k8s.ObjectRef          `yaml:"ref"`
-	NewObject *uo.UnstructuredObject `yaml:"newObject,omitempty"`
-	OldObject *uo.UnstructuredObject `yaml:"oldObject,omitempty"`
-	Changes   []Change               `yaml:"changes,omitempty"`
+	Ref     k8s.ObjectRef `yaml:"ref"`
+	Changes []Change      `yaml:"changes,omitempty"`
 }
 
 type RefAndObject struct {
