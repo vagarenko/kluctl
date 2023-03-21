@@ -31,7 +31,45 @@ type DeploymentError struct {
 	Error string        `yaml:"error"`
 }
 
+type KluctlDeploymentInfo struct {
+	Name      string `yaml:"name"`
+	Namespace string `yaml:"namespace"`
+	GitUrl    string `yaml:"gitUrl"`
+	GitRef    string `yaml:"gitRef"`
+}
+
+type CommandInitiator string
+
+const (
+	CommandInititiator_CommandLine      CommandInitiator = "CommandLine"
+	CommandInititiator_KluctlDeployment                  = "KluctlDeployment"
+)
+
+type CommandInfo struct {
+	Initiator             CommandInitiator       `yaml:"initiator" validate:"oneof=CommandLine KluctlDeployment"`
+	KluctlDeployment      *KluctlDeploymentInfo  `yaml:"kluctlDeployment,omitempty"`
+	Command               string                 `yaml:"command,omitempty"`
+	Target                *types.Target          `yaml:"target,omitempty"`
+	TargetNameOverride    string                 `yaml:"targetNameOverride,omitempty"`
+	ContextOverride       string                 `yaml:"contextOverride,omitempty"`
+	Args                  *uo.UnstructuredObject `yaml:"args,omitempty"`
+	Images                []types.FixedImage     `yaml:"images,omitempty"`
+	DryRun                bool                   `yaml:"dryRun,omitempty"`
+	NoWait                bool                   `yaml:"noWait,omitempty"`
+	ForceApply            bool                   `yaml:"forceApply,omitempty"`
+	ReplaceOnError        bool                   `yaml:"replaceOnError,omitempty"`
+	ForceReplaceOnError   bool                   `yaml:"forceReplaceOnError,omitempty"`
+	AbortOnError          bool                   `yaml:"abortOnError,omitempty"`
+	IncludeTags           []string               `yaml:"includeTags,omitempty"`
+	ExcludeTags           []string               `yaml:"excludeTags,omitempty"`
+	IncludeDeploymentDirs []string               `yaml:"includeDeploymentDirs,omitempty"`
+	ExcludeDeploymentDirs []string               `yaml:"excludeDeploymentDirs,omitempty"`
+}
+
 type CommandResult struct {
+	Command    *CommandInfo                   `yaml:"command,omitempty"`
+	Deployment *types.DeploymentProjectConfig `yaml:"deployment,omitempty"`
+
 	NewObjects     []*RefAndObject    `yaml:"newObjects,omitempty"`
 	ChangedObjects []*ChangedObject   `yaml:"changedObjects,omitempty"`
 	HookObjects    []*RefAndObject    `yaml:"hookObjects,omitempty"`

@@ -61,6 +61,10 @@ func (cmd *deleteCmd) Run(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
+		err = addCommandInfo(result, "delete", cmdCtx, &cmd.TargetFlags, &cmd.ImageFlags, &cmd.InclusionFlags, &cmd.DryRunFlags, nil, nil, nil, false)
+		if err != nil {
+			return err
+		}
 		err = outputCommandResult(ctx, cmd.OutputFormat, cmd.NoObfuscate, result)
 		if err != nil {
 			return err

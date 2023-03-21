@@ -50,6 +50,10 @@ func (cmd *diffCmd) Run(ctx context.Context) error {
 		if err != nil {
 			return err
 		}
+		err = addCommandInfo(result, "diff", cmdCtx, &cmd.TargetFlags, &cmd.ImageFlags, &cmd.InclusionFlags, nil, &cmd.ForceApplyFlags, &cmd.ReplaceOnErrorFlags, nil, false)
+		if err != nil {
+			return err
+		}
 		err = outputCommandResult(ctx, cmd.OutputFormat, cmd.NoObfuscate, result)
 		if err != nil {
 			return err
