@@ -19,11 +19,6 @@ type ChangedObject struct {
 	Changes []Change      `yaml:"changes,omitempty"`
 }
 
-type RefAndObject struct {
-	Ref    k8s.ObjectRef          `yaml:"ref"`
-	Object *uo.UnstructuredObject `yaml:"object,omitempty"`
-}
-
 type DeploymentError struct {
 	Ref   k8s.ObjectRef `yaml:"ref"`
 	Error string        `yaml:"error"`
@@ -68,14 +63,14 @@ type CommandResult struct {
 	Command    *CommandInfo                   `yaml:"command,omitempty"`
 	Deployment *types.DeploymentProjectConfig `yaml:"deployment,omitempty"`
 
-	NewObjects     []*RefAndObject    `yaml:"newObjects,omitempty"`
-	ChangedObjects []*ChangedObject   `yaml:"changedObjects,omitempty"`
-	HookObjects    []*RefAndObject    `yaml:"hookObjects,omitempty"`
-	OrphanObjects  []k8s.ObjectRef    `yaml:"orphanObjects,omitempty"`
-	DeletedObjects []k8s.ObjectRef    `yaml:"deletedObjects,omitempty"`
-	Errors         []DeploymentError  `yaml:"errors,omitempty"`
-	Warnings       []DeploymentError  `yaml:"warnings,omitempty"`
-	SeenImages     []types.FixedImage `yaml:"seenImages,omitempty"`
+	NewObjects     []*uo.UnstructuredObject `yaml:"newObjects,omitempty"`
+	ChangedObjects []*ChangedObject         `yaml:"changedObjects,omitempty"`
+	HookObjects    []*uo.UnstructuredObject `yaml:"hookObjects,omitempty"`
+	OrphanObjects  []k8s.ObjectRef          `yaml:"orphanObjects,omitempty"`
+	DeletedObjects []k8s.ObjectRef          `yaml:"deletedObjects,omitempty"`
+	Errors         []DeploymentError        `yaml:"errors,omitempty"`
+	Warnings       []DeploymentError        `yaml:"warnings,omitempty"`
+	SeenImages     []types.FixedImage       `yaml:"seenImages,omitempty"`
 }
 
 type ValidateResultEntry struct {

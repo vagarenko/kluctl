@@ -27,7 +27,7 @@ func formatCommandResultText(cr *result.CommandResult) string {
 		buf.WriteString("\nNew objects:\n")
 		var refs []k8s.ObjectRef
 		for _, o := range cr.NewObjects {
-			refs = append(refs, o.Ref)
+			refs = append(refs, o.GetK8sRef())
 		}
 		prettyObjectRefs(buf, refs)
 	}
@@ -57,7 +57,7 @@ func formatCommandResultText(cr *result.CommandResult) string {
 		buf.WriteString("\nApplied hooks:\n")
 		var refs []k8s.ObjectRef
 		for _, o := range cr.HookObjects {
-			refs = append(refs, o.Ref)
+			refs = append(refs, o.GetK8sRef())
 		}
 		prettyObjectRefs(buf, refs)
 	}
