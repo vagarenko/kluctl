@@ -7,28 +7,28 @@ import (
 )
 
 type Change struct {
-	Type        string      `yaml:"type" validate:"required"`
-	JsonPath    string      `yaml:"jsonPath" validate:"required"`
-	OldValue    interface{} `yaml:"oldValue,omitempty"`
-	NewValue    interface{} `yaml:"newValue,omitempty"`
-	UnifiedDiff string      `yaml:"unifiedDiff,omitempty"`
+	Type        string      `json:"type" validate:"required"`
+	JsonPath    string      `json:"jsonPath" validate:"required"`
+	OldValue    interface{} `json:"oldValue,omitempty"`
+	NewValue    interface{} `json:"newValue,omitempty"`
+	UnifiedDiff string      `json:"unifiedDiff,omitempty"`
 }
 
 type ChangedObject struct {
-	Ref     k8s.ObjectRef `yaml:"ref"`
-	Changes []Change      `yaml:"changes,omitempty"`
+	Ref     k8s.ObjectRef `json:"ref"`
+	Changes []Change      `json:"changes,omitempty"`
 }
 
 type DeploymentError struct {
-	Ref   k8s.ObjectRef `yaml:"ref"`
-	Error string        `yaml:"error"`
+	Ref   k8s.ObjectRef `json:"ref"`
+	Error string        `json:"error"`
 }
 
 type KluctlDeploymentInfo struct {
-	Name      string `yaml:"name"`
-	Namespace string `yaml:"namespace"`
-	GitUrl    string `yaml:"gitUrl"`
-	GitRef    string `yaml:"gitRef"`
+	Name      string `json:"name"`
+	Namespace string `json:"namespace"`
+	GitUrl    string `json:"gitUrl"`
+	GitRef    string `json:"gitRef"`
 }
 
 type CommandInitiator string
@@ -39,49 +39,49 @@ const (
 )
 
 type CommandInfo struct {
-	Initiator             CommandInitiator       `yaml:"initiator" validate:"oneof=CommandLine KluctlDeployment"`
-	KluctlDeployment      *KluctlDeploymentInfo  `yaml:"kluctlDeployment,omitempty"`
-	Command               string                 `yaml:"command,omitempty"`
-	Target                *types.Target          `yaml:"target,omitempty"`
-	TargetNameOverride    string                 `yaml:"targetNameOverride,omitempty"`
-	ContextOverride       string                 `yaml:"contextOverride,omitempty"`
-	Args                  *uo.UnstructuredObject `yaml:"args,omitempty"`
-	Images                []types.FixedImage     `yaml:"images,omitempty"`
-	DryRun                bool                   `yaml:"dryRun,omitempty"`
-	NoWait                bool                   `yaml:"noWait,omitempty"`
-	ForceApply            bool                   `yaml:"forceApply,omitempty"`
-	ReplaceOnError        bool                   `yaml:"replaceOnError,omitempty"`
-	ForceReplaceOnError   bool                   `yaml:"forceReplaceOnError,omitempty"`
-	AbortOnError          bool                   `yaml:"abortOnError,omitempty"`
-	IncludeTags           []string               `yaml:"includeTags,omitempty"`
-	ExcludeTags           []string               `yaml:"excludeTags,omitempty"`
-	IncludeDeploymentDirs []string               `yaml:"includeDeploymentDirs,omitempty"`
-	ExcludeDeploymentDirs []string               `yaml:"excludeDeploymentDirs,omitempty"`
+	Initiator             CommandInitiator       `json:"initiator" validate:"oneof=CommandLine KluctlDeployment"`
+	KluctlDeployment      *KluctlDeploymentInfo  `json:"kluctlDeployment,omitempty"`
+	Command               string                 `json:"command,omitempty"`
+	Target                *types.Target          `json:"target,omitempty"`
+	TargetNameOverride    string                 `json:"targetNameOverride,omitempty"`
+	ContextOverride       string                 `json:"contextOverride,omitempty"`
+	Args                  *uo.UnstructuredObject `json:"args,omitempty"`
+	Images                []types.FixedImage     `json:"images,omitempty"`
+	DryRun                bool                   `json:"dryRun,omitempty"`
+	NoWait                bool                   `json:"noWait,omitempty"`
+	ForceApply            bool                   `json:"forceApply,omitempty"`
+	ReplaceOnError        bool                   `json:"replaceOnError,omitempty"`
+	ForceReplaceOnError   bool                   `json:"forceReplaceOnError,omitempty"`
+	AbortOnError          bool                   `json:"abortOnError,omitempty"`
+	IncludeTags           []string               `json:"includeTags,omitempty"`
+	ExcludeTags           []string               `json:"excludeTags,omitempty"`
+	IncludeDeploymentDirs []string               `json:"includeDeploymentDirs,omitempty"`
+	ExcludeDeploymentDirs []string               `json:"excludeDeploymentDirs,omitempty"`
 }
 
 type CommandResult struct {
-	Command    *CommandInfo                   `yaml:"command,omitempty"`
-	Deployment *types.DeploymentProjectConfig `yaml:"deployment,omitempty"`
+	Command    *CommandInfo                   `json:"command,omitempty"`
+	Deployment *types.DeploymentProjectConfig `json:"deployment,omitempty"`
 
-	NewObjects     []*uo.UnstructuredObject `yaml:"newObjects,omitempty"`
-	ChangedObjects []*ChangedObject         `yaml:"changedObjects,omitempty"`
-	HookObjects    []*uo.UnstructuredObject `yaml:"hookObjects,omitempty"`
-	OrphanObjects  []k8s.ObjectRef          `yaml:"orphanObjects,omitempty"`
-	DeletedObjects []k8s.ObjectRef          `yaml:"deletedObjects,omitempty"`
-	Errors         []DeploymentError        `yaml:"errors,omitempty"`
-	Warnings       []DeploymentError        `yaml:"warnings,omitempty"`
-	SeenImages     []types.FixedImage       `yaml:"seenImages,omitempty"`
+	NewObjects     []*uo.UnstructuredObject `json:"newObjects,omitempty"`
+	ChangedObjects []*ChangedObject         `json:"changedObjects,omitempty"`
+	HookObjects    []*uo.UnstructuredObject `json:"hookObjects,omitempty"`
+	OrphanObjects  []k8s.ObjectRef          `json:"orphanObjects,omitempty"`
+	DeletedObjects []k8s.ObjectRef          `json:"deletedObjects,omitempty"`
+	Errors         []DeploymentError        `json:"errors,omitempty"`
+	Warnings       []DeploymentError        `json:"warnings,omitempty"`
+	SeenImages     []types.FixedImage       `json:"seenImages,omitempty"`
 }
 
 type ValidateResultEntry struct {
-	Ref        k8s.ObjectRef `yaml:"ref"`
-	Annotation string        `yaml:"annotation"`
-	Message    string        `yaml:"message"`
+	Ref        k8s.ObjectRef `json:"ref"`
+	Annotation string        `json:"annotation"`
+	Message    string        `json:"message"`
 }
 
 type ValidateResult struct {
-	Ready    bool                  `yaml:"ready"`
-	Warnings []DeploymentError     `yaml:"warnings,omitempty"`
-	Errors   []DeploymentError     `yaml:"errors,omitempty"`
-	Results  []ValidateResultEntry `yaml:"results,omitempty"`
+	Ready    bool                  `json:"ready"`
+	Warnings []DeploymentError     `json:"warnings,omitempty"`
+	Errors   []DeploymentError     `json:"errors,omitempty"`
+	Results  []ValidateResultEntry `json:"results,omitempty"`
 }

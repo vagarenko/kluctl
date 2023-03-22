@@ -1,29 +1,30 @@
 package types
 
 import (
+	"encoding/json"
 	"github.com/go-playground/validator/v10"
 	"github.com/kluctl/kluctl/v2/pkg/utils/uo"
 	"github.com/kluctl/kluctl/v2/pkg/yaml"
 )
 
 type DeploymentItemConfig struct {
-	Path             *string                  `yaml:"path,omitempty"`
-	Include          *string                  `yaml:"include,omitempty"`
-	Git              *GitProject              `yaml:"git,omitempty"`
-	Tags             []string                 `yaml:"tags,omitempty"`
-	Barrier          bool                     `yaml:"barrier,omitempty"`
-	WaitReadiness    bool                     `yaml:"waitReadiness,omitempty"`
-	Vars             []*VarsSource            `yaml:"vars,omitempty"`
-	SkipDeleteIfTags bool                     `yaml:"skipDeleteIfTags,omitempty"`
-	OnlyRender       bool                     `yaml:"onlyRender,omitempty"`
-	AlwaysDeploy     bool                     `yaml:"alwaysDeploy,omitempty"`
-	DeleteObjects    []DeleteObjectItemConfig `yaml:"deleteObjects,omitempty"`
-	When             string                   `yaml:"when,omitempty"`
+	Path             *string                  `json:"path,omitempty"`
+	Include          *string                  `json:"include,omitempty"`
+	Git              *GitProject              `json:"git,omitempty"`
+	Tags             []string                 `json:"tags,omitempty"`
+	Barrier          bool                     `json:"barrier,omitempty"`
+	WaitReadiness    bool                     `json:"waitReadiness,omitempty"`
+	Vars             []*VarsSource            `json:"vars,omitempty"`
+	SkipDeleteIfTags bool                     `json:"skipDeleteIfTags,omitempty"`
+	OnlyRender       bool                     `json:"onlyRender,omitempty"`
+	AlwaysDeploy     bool                     `json:"alwaysDeploy,omitempty"`
+	DeleteObjects    []DeleteObjectItemConfig `json:"deleteObjects,omitempty"`
+	When             string                   `json:"when,omitempty"`
 
 	// these are only allowed when writing the command result
-	RenderedHelmChartConfig *HelmChartConfig         `yaml:"renderedHelmChartConfig,omitempty"`
-	RenderedObjects         []*uo.UnstructuredObject `yaml:"renderedObjects,omitempty"`
-	RenderedInclude         *DeploymentProjectConfig `yaml:"renderedInclude,omitempty"`
+	RenderedHelmChartConfig *HelmChartConfig         `json:"renderedHelmChartConfig,omitempty"`
+	RenderedObjects         []*uo.UnstructuredObject `json:"renderedObjects,omitempty"`
+	RenderedInclude         *DeploymentProjectConfig `json:"renderedInclude,omitempty"`
 }
 
 func ValidateDeploymentItemConfig(sl validator.StructLevel) {
@@ -47,10 +48,10 @@ func ValidateDeploymentItemConfig(sl validator.StructLevel) {
 }
 
 type DeleteObjectItemConfig struct {
-	Group     *string `yaml:"group,omitempty"`
-	Kind      *string `yaml:"kind,omitempty"`
-	Name      string  `yaml:"name" validate:"required"`
-	Namespace string  `yaml:"namespace,omitempty"`
+	Group     *string `json:"group,omitempty"`
+	Kind      *string `json:"kind,omitempty"`
+	Name      string  `json:"name" validate:"required"`
+	Namespace string  `json:"namespace,omitempty"`
 }
 
 func ValidateDeleteObjectItemConfig(sl validator.StructLevel) {
@@ -61,21 +62,21 @@ func ValidateDeleteObjectItemConfig(sl validator.StructLevel) {
 }
 
 type SealedSecretsConfig struct {
-	OutputPattern *string `yaml:"outputPattern,omitempty"`
+	OutputPattern *string `json:"outputPattern,omitempty"`
 }
 
 type SingleStringOrList []string
 
-func (s *SingleStringOrList) UnmarshalYAML(unmarshal func(interface{}) error) error {
+func (s *SingleStringOrList) UnmarshalJSON(b []byte) error {
 	var single string
-	if err := unmarshal(&single); err == nil {
+	if err := json.Unmarshal(b, &single); err == nil {
 		// it's a single project
 		*s = []string{single}
 		return nil
 	}
 	// try as array
 	var arr []string
-	if err := unmarshal(&arr); err != nil {
+	if err := json.Unmarshal(b, &arr); err != nil {
 		return err
 	}
 	*s = arr
@@ -83,26 +84,26 @@ func (s *SingleStringOrList) UnmarshalYAML(unmarshal func(interface{}) error) er
 }
 
 type IgnoreForDiffItemConfig struct {
-	FieldPath SingleStringOrList `yaml:"fieldPath" validate:"required"`
-	Group     *string            `yaml:"group,omitempty"`
-	Kind      *string            `yaml:"kind,omitempty"`
-	Name      *string            `yaml:"name,omitempty"`
-	Namespace *string            `yaml:"namespace,omitempty"`
+	FieldPath SingleStringOrList `json:"fieldPath" validate:"required"`
+	Group     *string            `json:"group,omitempty"`
+	Kind      *string            `json:"kind,omitempty"`
+	Name      *string            `json:"name,omitempty"`
+	Namespace *string            `json:"namespace,omitempty"`
 }
 
 type DeploymentProjectConfig struct {
-	Vars          []*VarsSource        `yaml:"vars,omitempty"`
-	SealedSecrets *SealedSecretsConfig `yaml:"sealedSecrets,omitempty"`
+	Vars          []*VarsSource        `json:"vars,omitempty"`
+	SealedSecrets *SealedSecretsConfig `json:"sealedSecrets,omitempty"`
 
-	When string `yaml:"when,omitempty"`
+	When string `json:"when,omitempty"`
 
-	Deployments []*DeploymentItemConfig `yaml:"deployments,omitempty"`
+	Deployments []*DeploymentItemConfig `json:"deployments,omitempty"`
 
-	CommonLabels      map[string]string `yaml:"commonLabels,omitempty"`
-	OverrideNamespace *string           `yaml:"overrideNamespace,omitempty"`
-	Tags              []string          `yaml:"tags,omitempty"`
+	CommonLabels      map[string]string `json:"commonLabels,omitempty"`
+	OverrideNamespace *string           `json:"overrideNamespace,omitempty"`
+	Tags              []string          `json:"tags,omitempty"`
 
-	IgnoreForDiff []*IgnoreForDiffItemConfig `yaml:"ignoreForDiff,omitempty"`
+	IgnoreForDiff []*IgnoreForDiffItemConfig `json:"ignoreForDiff,omitempty"`
 }
 
 func init() {

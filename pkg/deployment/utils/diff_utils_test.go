@@ -114,9 +114,9 @@ func TestDiff(t *testing.T) {
 			a: func(t *testing.T, dtc *diffTestConfig) {
 				assert.Len(t, dtc.du.ChangedObjects, 1)
 				assert.Equal(t, []result.Change{
+					result.Change{Type: "update", JsonPath: "data.d1", OldValue: "v1", NewValue: "v12", UnifiedDiff: "-v1\n+v12"},
 					result.Change{Type: "delete", JsonPath: "data.d2", OldValue: "v2", NewValue: interface{}(nil), UnifiedDiff: "-v2"},
 					result.Change{Type: "insert", JsonPath: "data.d3", OldValue: interface{}(nil), NewValue: "v3", UnifiedDiff: "+v3"},
-					result.Change{Type: "update", JsonPath: "data.d1", OldValue: "v1", NewValue: "v12", UnifiedDiff: "-v1\n+v12"},
 				}, dtc.du.ChangedObjects[0].Changes)
 			},
 		},
