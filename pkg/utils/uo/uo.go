@@ -10,7 +10,7 @@ import (
 )
 
 type UnstructuredObject struct {
-	Object map[string]interface{} `json:"object,omitempty,inline"`
+	Object map[string]interface{} `json:"object,omitempty,inline" ts_type:"any" ts_transform:"source"`
 }
 
 func (uo *UnstructuredObject) MarshalJSON() ([]byte, error) {

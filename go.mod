@@ -42,7 +42,7 @@ require (
 	golang.org/x/term v0.6.0
 	golang.org/x/text v0.8.0
 	gopkg.in/yaml.v2 v2.4.0
-	gopkg.in/yaml.v3 v3.0.1
+	gopkg.in/yaml.v3 v3.0.1 // indirect
 	helm.sh/helm/v3 v3.11.2
 	k8s.io/api v0.26.2
 	k8s.io/apiextensions-apiserver v0.26.2
@@ -64,6 +64,7 @@ require (
 	github.com/huandu/xstrings v1.4.0
 	github.com/onsi/gomega v1.27.4
 	github.com/otiai10/copy v1.9.0
+	github.com/tkrajina/typescriptify-golang-structs v0.1.10
 	go.mozilla.org/sops/v3 v3.7.4-0.20220901181616-9124783930b1
 	sigs.k8s.io/controller-runtime v0.14.5
 	sigs.k8s.io/kustomize/api v0.12.1
@@ -209,6 +210,7 @@ require (
 	github.com/spf13/cast v1.5.0 // indirect
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
+	github.com/tkrajina/go-reflector v0.5.5 // indirect
 	github.com/urfave/cli v1.22.7 // indirect
 	github.com/vmihailenco/msgpack v4.0.4+incompatible // indirect
 	github.com/xeipuuv/gojsonpointer v0.0.0-20190905194746-02993c407bfb // indirect
