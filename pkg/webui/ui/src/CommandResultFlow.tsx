@@ -1,13 +1,13 @@
-import {addEdge, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState} from "reactflow";
-import {useCallback, useEffect} from "react";
-import {buildCommandResultNode} from "./nodes/buildNodes";
-import {CommandResult} from "./models";
+import { addEdge, Connection, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState, Node, Edge, getOutgoers, getConnectedEdges } from "reactflow";
+import { useCallback, useEffect } from "react";
+import { buildCommandResultNode, NodeData } from "./nodes/buildNodes";
+import { CommandResult } from "./models";
 
 import testResult from './test-result.json';
-import {layoutNodes} from "./nodes/layout";
+import { layoutNodes } from "./nodes/layout";
 
-const connectionLineStyle = {stroke: '#fff'};
-const defaultViewport = {x: 0, y: 0, zoom: 1.5};
+const connectionLineStyle = { stroke: '#fff' };
+const defaultViewport = { x: 0, y: 0, zoom: 1 };
 const initBgColor = '#1A192B';
 
 const CommandResultFlow = () => {
@@ -23,13 +23,15 @@ const CommandResultFlow = () => {
     useEffect(() => {
         setNodes(nodes);
         setEdges(edges);
-    }, []);
+    }, [edges, nodes, setEdges, setNodes]);
 
     const onConnect = useCallback(
-        (params: any) =>
-            setEdges((eds) => addEdge({...params, animated: true, style: {stroke: '#fff'}}, eds)),
-        []
+        (params: Connection) =>
+            setEdges((eds) => addEdge({ ...params, animated: true, style: { stroke: '#fff' } }, eds)),
+        [setEdges]
     );
+
+
     return (
         <ReactFlow
             nodes={nodes}
@@ -37,8 +39,9 @@ const CommandResultFlow = () => {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             onConnect={onConnect}
-            style={{background: initBgColor}}
+            style={{ background: initBgColor }}
             nodeTypes={nodeTypes}
+            nodesConnectable={false}
             connectionLineStyle={connectionLineStyle}
             //snapToGrid={true}
             //snapGrid={snapGrid}
@@ -47,17 +50,17 @@ const CommandResultFlow = () => {
             attributionPosition="bottom-left"
         >
             <MiniMap
-                /*nodeStrokeColor={(n) => {
-                    if (n.type === 'input') return '#0041d0';
-                    if (n.type === 'selectorNode') return bgColor;
-                    if (n.type === 'output') return '#ff0072';
-                }}*/
-                /*nodeColor={(n) => {
-                    //if (n.type === 'selectorNode') return bgColor;
-                    return '#fff';
-                }}*/
+            /*nodeStrokeColor={(n) => {
+                if (n.type === 'input') return '#0041d0';
+                if (n.type === 'selectorNode') return bgColor;
+                if (n.type === 'output') return '#ff0072';
+            }}*/
+            /*nodeColor={(n) => {
+                //if (n.type === 'selectorNode') return bgColor;
+                return '#fff';
+            }}*/
             />
-            <Controls/>
+            <Controls />
         </ReactFlow>
     );
 };

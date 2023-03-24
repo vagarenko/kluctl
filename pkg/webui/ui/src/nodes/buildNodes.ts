@@ -1,10 +1,18 @@
-import {Edge, Node,} from 'reactflow';
-import {CommandResult, DeploymentItemConfig, DeploymentProjectConfig, VarsSource} from "../models";
-import CommandResultNode, {CommandResultNodeData} from "./CommandResultNode";
-import DeploymentProjectNode, {DeploymentProjectNodeData} from "./DeploymentProjectNode";
-import VarsSourceNode, {VarsSourceNodeData} from "./VarsSourceNode";
-import DeploymentItemNode, {DeploymentItemNodeData} from "./DeploymentItemNode";
-import ObjectNode, {ObjectNodeData} from "./ObjectNode";
+import { Edge, Node } from 'reactflow';
+import { CommandResult, DeploymentItemConfig, DeploymentProjectConfig, VarsSource } from "../models";
+import CommandResultNode, { CommandResultNodeData } from "./CommandResultNode";
+import DeploymentProjectNode, { DeploymentProjectNodeData } from "./DeploymentProjectNode";
+import VarsSourceNode, { VarsSourceNodeData } from "./VarsSourceNode";
+import DeploymentItemNode, { DeploymentItemNodeData } from "./DeploymentItemNode";
+import ObjectNode, { ObjectNodeData } from "./ObjectNode";
+
+export type NodeData =
+    | CommandResultNodeData
+    | DeploymentProjectNodeData
+    | VarsSourceNodeData
+    | DeploymentItemNodeData
+    | ObjectNodeData
+
 
 const nodeTypes = {
     commandResult: CommandResultNode,
@@ -14,7 +22,7 @@ const nodeTypes = {
     object: ObjectNode,
 };
 
-const position = {x: 0, y: 0};
+const position = { x: 0, y: 0 };
 const edgeType = 'default';
 
 let nextId = 1
@@ -25,14 +33,14 @@ function genNextId(): string {
     return id.toString()
 }
 
-export function buildCommandResultNode(commandResult: CommandResult): [Node[], Edge[], any] {
-    let nodes: Node[] = []
+export function buildCommandResultNode(commandResult: CommandResult): [Node<NodeData>[], Edge[], any] {
+    let nodes: Node<NodeData>[] = []
     let edges: Edge[] = []
 
     let rootNode: Node<CommandResultNodeData> = {
         id: genNextId().toString(),
         type: "commandResult",
-        data: {commandResult: commandResult},
+        data: { commandResult: commandResult },
         position,
     }
     nodes.push(rootNode)
@@ -42,11 +50,11 @@ export function buildCommandResultNode(commandResult: CommandResult): [Node[], E
     return [nodes, edges, nodeTypes]
 }
 
-function buildDeploymentProjectNode(nodes: Node[], edges: Edge[], commandResult: CommandResult, parentNode: Node, deploymentProjectConfig: DeploymentProjectConfig) {
+function buildDeploymentProjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, deploymentProjectConfig: DeploymentProjectConfig) {
     let node: Node<DeploymentProjectNodeData> = {
         id: genNextId(),
         type: "deploymentProject",
-        data: {commandResult: commandResult, deploymentProject: deploymentProjectConfig},
+        data: { commandResult: commandResult, deploymentProject: deploymentProjectConfig },
         position
     }
 
@@ -66,11 +74,11 @@ function buildDeploymentProjectNode(nodes: Node[], edges: Edge[], commandResult:
     })
 }
 
-function buildVarsSourceNode(nodes: Node[], edges: Edge[], commandResult: CommandResult, parentNode: Node, varsSource: VarsSource) {
+function buildVarsSourceNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, varsSource: VarsSource) {
     let node: Node<VarsSourceNodeData> = {
         id: genNextId(),
         type: "varsSource",
-        data: {commandResult: commandResult, varsSource: varsSource},
+        data: { commandResult: commandResult, varsSource: varsSource },
         position
     }
 
@@ -84,11 +92,11 @@ function buildVarsSourceNode(nodes: Node[], edges: Edge[], commandResult: Comman
     })
 }
 
-function buildDeploymentItemNode(nodes: Node[], edges: Edge[], commandResult: CommandResult, parentNode: Node, deploymentItem: DeploymentItemConfig) {
+function buildDeploymentItemNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, deploymentItem: DeploymentItemConfig) {
     let node: Node<DeploymentItemNodeData> = {
         id: genNextId(),
         type: "deploymentItem",
-        data: {commandResult: commandResult, deploymentItem: deploymentItem},
+        data: { commandResult: commandResult, deploymentItem: deploymentItem },
         position
     }
 
@@ -113,11 +121,11 @@ function buildDeploymentItemNode(nodes: Node[], edges: Edge[], commandResult: Co
     })
 }
 
-function buildObjectNode(nodes: Node[], edges: Edge[], commandResult: CommandResult, parentNode: Node, renderedObject: any) {
+function buildObjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, renderedObject: any) {
     let node: Node<ObjectNodeData> = {
         id: genNextId(),
         type: "object",
-        data: {commandResult: commandResult, renderedObject: renderedObject},
+        data: { commandResult: commandResult, renderedObject: renderedObject },
         position
     }
 

@@ -1,8 +1,9 @@
 import React, { memo } from 'react';
-import {Handle, NodeProps, Position} from 'reactflow';
+import { NodeProps } from 'reactflow';
 
 import "./nodes.css"
-import {CommandResult, DeploymentProjectConfig} from "../models";
+import { CommandResult, DeploymentProjectConfig } from "../models";
+import GenericNode from './GenericNode';
 
 export type DeploymentProjectNodeData = {
     commandResult: CommandResult
@@ -11,33 +12,14 @@ export type DeploymentProjectNodeData = {
 
 export default memo((props: NodeProps<DeploymentProjectNodeData>) => {
     return (
-        <>
-            <div>
-                <strong>DeploymentProject</strong><br/>
-                tags: {props.data.deploymentProject.tags}<br/>
-            </div>
-
-            <Handle
-                type="target"
-                position={Position.Left}
-                id="parent"
-                style={{ bottom: 10, top: 'auto', background: '#555' }}
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="vars"
-                style={{bottom: 10, top: 'auto', background: '#555'}}
-                isConnectable={true}
-            />
-            <Handle
-                type="source"
-                position={Position.Right}
-                id="deployments"
-                style={{ bottom: 0, top: 'auto', background: '#555' }}
-                isConnectable={true}
-            />
-        </>
+        <GenericNode
+            header="DeploymentProject"
+            body={<>
+                tags: {props.data.deploymentProject.tags}<br />
+            </>}
+            leftHandleId="parent"
+            rightHandleIds={["vars", "deployments"]}
+            nodeProps={props}
+        />
     );
 });

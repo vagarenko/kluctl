@@ -1,0 +1,1219 @@
+{
+  "command": {
+    "initiator": "CommandLine",
+    "command": "diff",
+    "target": {
+      "name": "test",
+      "context": "kind-kind",
+      "args": {
+        "env_type": "non-prod"
+      },
+      "discriminator": "podtato-head-test"
+    }
+  },
+  "deployment": {
+    "vars": [
+      {
+        "file": "config/common.yaml",
+        "renderedVars": {
+          "legs_enabled": true,
+          "podtato": {
+            "image_name": "ghcr.io/podtato-head/podtato-server",
+            "tag": "v0.3.1"
+          },
+          "replicas": {
+            "frontend": 1,
+            "hat": 1,
+            "left-arm": 1,
+            "left-leg": 1,
+            "right-arm": 1,
+            "right-leg": 1
+          }
+        }
+      },
+      {
+        "file": "config/non-prod.yaml",
+        "renderedVars": {
+          "replicas": {
+            "hat": 2
+          }
+        }
+      }
+    ],
+    "deployments": [
+      {
+        "include": "podtato-services",
+        "tags": [
+          "podtato-services"
+        ],
+        "renderedInclude": {
+          "deployments": [
+            {
+              "path": "namespace",
+              "tags": [
+                "namespace"
+              ],
+              "renderedObjects": [
+                {
+                  "apiVersion": "v1",
+                  "kind": "Namespace",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/namespace"
+                    },
+                    "labels": {
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "namespace",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "test-podtato-kluctl"
+                  }
+                }
+              ]
+            },
+            {
+              "barrier": true
+            },
+            {
+              "path": "misc",
+              "tags": [
+                "misc"
+              ],
+              "renderedObjects": [
+                {
+                  "apiVersion": "v1",
+                  "data": {
+                    "servicesConfig.yaml": "hat:       \"http://podtato-head-hat:9001\"\nleft-leg:  \"http://podtato-head-left-leg:9002\"\nleft-arm:  \"http://podtato-head-left-arm:9003\"\nright-leg: \"http://podtato-head-right-leg:9004\"\nright-arm: \"http://podtato-head-right-arm:9005\""
+                  },
+                  "kind": "ConfigMap",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/misc"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "entry",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "misc",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-service-discovery",
+                    "namespace": "test-podtato-kluctl"
+                  }
+                },
+                {
+                  "apiVersion": "v1",
+                  "kind": "ServiceAccount",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/misc"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "serviceaccount",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "misc",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head",
+                    "namespace": "test-podtato-kluctl"
+                  }
+                }
+              ]
+            },
+            {
+              "path": "frontend",
+              "tags": [
+                "frontend"
+              ],
+              "renderedObjects": [
+                {
+                  "apiVersion": "apps/v1",
+                  "kind": "Deployment",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/frontend"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "frontend",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "frontend",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-frontend",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "replicas": 1,
+                    "selector": {
+                      "matchLabels": {
+                        "app.kubernetes.io/component": "frontend",
+                        "app.kubernetes.io/name": "podtato-head"
+                      }
+                    },
+                    "template": {
+                      "metadata": {
+                        "labels": {
+                          "app.kubernetes.io/component": "frontend",
+                          "app.kubernetes.io/name": "podtato-head"
+                        }
+                      },
+                      "spec": {
+                        "containers": [
+                          {
+                            "env": [
+                              {
+                                "name": "PODTATO_COMPONENT",
+                                "value": "frontend"
+                              },
+                              {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                  "fieldRef": {
+                                    "fieldPath": "metadata.name"
+                                  }
+                                }
+                              },
+                              {
+                                "name": "SERVICES_CONFIG_FILE_PATH",
+                                "value": "/config/servicesConfig.yaml"
+                              }
+                            ],
+                            "image": "ghcr.io/podtato-head/podtato-server:v0.3.1",
+                            "imagePullPolicy": "IfNotPresent",
+                            "livenessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "name": "podtato-head-frontend",
+                            "ports": [
+                              {
+                                "containerPort": 8080,
+                                "name": "http",
+                                "protocol": "TCP"
+                              }
+                            ],
+                            "readinessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "resources": {},
+                            "volumeMounts": [
+                              {
+                                "mountPath": "/config",
+                                "name": "service-discovery-map"
+                              }
+                            ]
+                          }
+                        ],
+                        "serviceAccountName": "podtato-head",
+                        "terminationGracePeriodSeconds": 5,
+                        "volumes": [
+                          {
+                            "configMap": {
+                              "name": "podtato-head-service-discovery"
+                            },
+                            "name": "service-discovery-map"
+                          }
+                        ]
+                      }
+                    }
+                  }
+                },
+                {
+                  "apiVersion": "v1",
+                  "kind": "Service",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/frontend",
+                      "kluctl.io/validate-ignore": "true"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "frontend",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "frontend",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-frontend",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "ports": [
+                      {
+                        "name": "http",
+                        "port": 9000,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                      }
+                    ],
+                    "selector": {
+                      "app.kubernetes.io/component": "frontend",
+                      "app.kubernetes.io/name": "podtato-head"
+                    },
+                    "type": "LoadBalancer"
+                  }
+                }
+              ]
+            },
+            {
+              "path": "template-service",
+              "tags": [
+                "template-service"
+              ],
+              "vars": [
+                {
+                  "values": {
+                    "service": {
+                      "component": "hat",
+                      "port": 9001
+                    }
+                  },
+                  "renderedVars": {
+                    "service": {
+                      "component": "hat",
+                      "port": 9001
+                    }
+                  }
+                }
+              ],
+              "renderedObjects": [
+                {
+                  "apiVersion": "apps/v1",
+                  "kind": "Deployment",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/template-service"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "hat",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "template-service",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-hat",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "replicas": 2,
+                    "selector": {
+                      "matchLabels": {
+                        "app.kubernetes.io/component": "hat",
+                        "app.kubernetes.io/name": "podtato-head"
+                      }
+                    },
+                    "template": {
+                      "metadata": {
+                        "labels": {
+                          "app.kubernetes.io/component": "hat",
+                          "app.kubernetes.io/name": "podtato-head"
+                        }
+                      },
+                      "spec": {
+                        "containers": [
+                          {
+                            "env": [
+                              {
+                                "name": "PODTATO_COMPONENT",
+                                "value": "hat"
+                              },
+                              {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                  "fieldRef": {
+                                    "fieldPath": "metadata.name"
+                                  }
+                                }
+                              }
+                            ],
+                            "image": "ghcr.io/podtato-head/podtato-server:v0.3.1",
+                            "imagePullPolicy": "IfNotPresent",
+                            "livenessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "name": "podtato-head-hat",
+                            "ports": [
+                              {
+                                "containerPort": 8080,
+                                "name": "http",
+                                "protocol": "TCP"
+                              }
+                            ],
+                            "readinessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "resources": {}
+                          }
+                        ],
+                        "serviceAccountName": "podtato-head",
+                        "terminationGracePeriodSeconds": 5
+                      }
+                    }
+                  }
+                },
+                {
+                  "apiVersion": "v1",
+                  "kind": "Service",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/template-service"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "hat",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "template-service",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-hat",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "ports": [
+                      {
+                        "name": "http",
+                        "port": 9001,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                      }
+                    ],
+                    "selector": {
+                      "app.kubernetes.io/component": "hat",
+                      "app.kubernetes.io/name": "podtato-head"
+                    },
+                    "type": "ClusterIP"
+                  }
+                }
+              ]
+            },
+            {
+              "path": "template-service",
+              "tags": [
+                "template-service"
+              ],
+              "vars": [
+                {
+                  "values": {
+                    "service": {
+                      "component": "left-leg",
+                      "port": 9002
+                    }
+                  },
+                  "renderedVars": {
+                    "service": {
+                      "component": "left-leg",
+                      "port": 9002
+                    }
+                  }
+                }
+              ],
+              "when": "True",
+              "renderedObjects": [
+                {
+                  "apiVersion": "apps/v1",
+                  "kind": "Deployment",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/template-service"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "left-leg",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "template-service",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-left-leg",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "replicas": 1,
+                    "selector": {
+                      "matchLabels": {
+                        "app.kubernetes.io/component": "left-leg",
+                        "app.kubernetes.io/name": "podtato-head"
+                      }
+                    },
+                    "template": {
+                      "metadata": {
+                        "labels": {
+                          "app.kubernetes.io/component": "left-leg",
+                          "app.kubernetes.io/name": "podtato-head"
+                        }
+                      },
+                      "spec": {
+                        "containers": [
+                          {
+                            "env": [
+                              {
+                                "name": "PODTATO_COMPONENT",
+                                "value": "left-leg"
+                              },
+                              {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                  "fieldRef": {
+                                    "fieldPath": "metadata.name"
+                                  }
+                                }
+                              }
+                            ],
+                            "image": "ghcr.io/podtato-head/podtato-server:v0.3.1",
+                            "imagePullPolicy": "IfNotPresent",
+                            "livenessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "name": "podtato-head-left-leg",
+                            "ports": [
+                              {
+                                "containerPort": 8080,
+                                "name": "http",
+                                "protocol": "TCP"
+                              }
+                            ],
+                            "readinessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "resources": {}
+                          }
+                        ],
+                        "serviceAccountName": "podtato-head",
+                        "terminationGracePeriodSeconds": 5
+                      }
+                    }
+                  }
+                },
+                {
+                  "apiVersion": "v1",
+                  "kind": "Service",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/template-service"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "left-leg",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "template-service",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-left-leg",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "ports": [
+                      {
+                        "name": "http",
+                        "port": 9002,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                      }
+                    ],
+                    "selector": {
+                      "app.kubernetes.io/component": "left-leg",
+                      "app.kubernetes.io/name": "podtato-head"
+                    },
+                    "type": "ClusterIP"
+                  }
+                }
+              ]
+            },
+            {
+              "path": "template-service",
+              "tags": [
+                "template-service"
+              ],
+              "vars": [
+                {
+                  "values": {
+                    "service": {
+                      "component": "left-arm",
+                      "port": 9013
+                    }
+                  },
+                  "renderedVars": {
+                    "service": {
+                      "component": "left-arm",
+                      "port": 9013
+                    }
+                  }
+                }
+              ],
+              "renderedObjects": [
+                {
+                  "apiVersion": "apps/v1",
+                  "kind": "Deployment",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/template-service"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "left-arm",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "template-service",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-left-arm",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "replicas": 1,
+                    "selector": {
+                      "matchLabels": {
+                        "app.kubernetes.io/component": "left-arm",
+                        "app.kubernetes.io/name": "podtato-head"
+                      }
+                    },
+                    "template": {
+                      "metadata": {
+                        "labels": {
+                          "app.kubernetes.io/component": "left-arm",
+                          "app.kubernetes.io/name": "podtato-head"
+                        }
+                      },
+                      "spec": {
+                        "containers": [
+                          {
+                            "env": [
+                              {
+                                "name": "PODTATO_COMPONENT",
+                                "value": "left-arm"
+                              },
+                              {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                  "fieldRef": {
+                                    "fieldPath": "metadata.name"
+                                  }
+                                }
+                              }
+                            ],
+                            "image": "ghcr.io/podtato-head/podtato-server:v0.3.1",
+                            "imagePullPolicy": "IfNotPresent",
+                            "livenessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "name": "podtato-head-left-arm",
+                            "ports": [
+                              {
+                                "containerPort": 8080,
+                                "name": "http",
+                                "protocol": "TCP"
+                              }
+                            ],
+                            "readinessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "resources": {}
+                          }
+                        ],
+                        "serviceAccountName": "podtato-head",
+                        "terminationGracePeriodSeconds": 5
+                      }
+                    }
+                  }
+                },
+                {
+                  "apiVersion": "v1",
+                  "kind": "Service",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/template-service"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "left-arm",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "template-service",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-left-arm",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "ports": [
+                      {
+                        "name": "http",
+                        "port": 9013,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                      }
+                    ],
+                    "selector": {
+                      "app.kubernetes.io/component": "left-arm",
+                      "app.kubernetes.io/name": "podtato-head"
+                    },
+                    "type": "ClusterIP"
+                  }
+                }
+              ]
+            },
+            {
+              "path": "template-service",
+              "tags": [
+                "template-service"
+              ],
+              "vars": [
+                {
+                  "values": {
+                    "service": {
+                      "component": "right-leg",
+                      "port": 9004
+                    }
+                  },
+                  "renderedVars": {
+                    "service": {
+                      "component": "right-leg",
+                      "port": 9004
+                    }
+                  }
+                }
+              ],
+              "when": "True",
+              "renderedObjects": [
+                {
+                  "apiVersion": "apps/v1",
+                  "kind": "Deployment",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/template-service"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "right-leg",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "template-service",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-right-leg",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "replicas": 1,
+                    "selector": {
+                      "matchLabels": {
+                        "app.kubernetes.io/component": "right-leg",
+                        "app.kubernetes.io/name": "podtato-head"
+                      }
+                    },
+                    "template": {
+                      "metadata": {
+                        "labels": {
+                          "app.kubernetes.io/component": "right-leg",
+                          "app.kubernetes.io/name": "podtato-head"
+                        }
+                      },
+                      "spec": {
+                        "containers": [
+                          {
+                            "env": [
+                              {
+                                "name": "PODTATO_COMPONENT",
+                                "value": "right-leg"
+                              },
+                              {
+                                "name": "POD_NAME",
+                                "valueFrom": {
+                                  "fieldRef": {
+                                    "fieldPath": "metadata.name"
+                                  }
+                                }
+                              }
+                            ],
+                            "image": "ghcr.io/podtato-head/podtato-server:v0.3.1",
+                            "imagePullPolicy": "IfNotPresent",
+                            "livenessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "name": "podtato-head-right-leg",
+                            "ports": [
+                              {
+                                "containerPort": 8080,
+                                "name": "http",
+                                "protocol": "TCP"
+                              }
+                            ],
+                            "readinessProbe": {
+                              "httpGet": {
+                                "path": "/healthz",
+                                "port": "http"
+                              }
+                            },
+                            "resources": {}
+                          }
+                        ],
+                        "serviceAccountName": "podtato-head",
+                        "terminationGracePeriodSeconds": 5
+                      }
+                    }
+                  }
+                },
+                {
+                  "apiVersion": "v1",
+                  "kind": "Service",
+                  "metadata": {
+                    "annotations": {
+                      "kluctl.io/deployment-item-dir": "podtato-services/template-service"
+                    },
+                    "labels": {
+                      "app.kubernetes.io/component": "right-leg",
+                      "app.kubernetes.io/name": "podtato-head",
+                      "kluctl.io/discriminator": "podtato-head-test",
+                      "kluctl.io/tag-0": "podtato-services",
+                      "kluctl.io/tag-1": "template-service",
+                      "podtato-head.kluctl.io/env-type": "non-prod",
+                      "podtato-head.kluctl.io/target": "test"
+                    },
+                    "name": "podtato-head-right-leg",
+                    "namespace": "test-podtato-kluctl"
+                  },
+                  "spec": {
+                    "ports": [
+                      {
+                        "name": "http",
+                        "port": 9004,
+                        "protocol": "TCP",
+                        "targetPort": "http"
+                      }
+                    ],
+                    "selector": {
+                      "app.kubernetes.io/component": "right-leg",
+                      "app.kubernetes.io/name": "podtato-head"
+                    },
+                    "type": "ClusterIP"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "commonLabels": {
+      "podtato-head.kluctl.io/env-type": "non-prod",
+      "podtato-head.kluctl.io/target": "test"
+    },
+    "overrideNamespace": "test-podtato-kluctl"
+  },
+  "newObjects": [
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": {
+        "annotations": {
+          "kluctl.io/deployment-item-dir": "podtato-services/frontend"
+        },
+        "creationTimestamp": "2023-03-22T11:39:54Z",
+        "generation": 1,
+        "labels": {
+          "app.kubernetes.io/component": "frontend",
+          "app.kubernetes.io/name": "podtato-head",
+          "kluctl.io/discriminator": "podtato-head-test",
+          "kluctl.io/tag-0": "podtato-services",
+          "kluctl.io/tag-1": "frontend",
+          "podtato-head.kluctl.io/env-type": "non-prod",
+          "podtato-head.kluctl.io/target": "test"
+        },
+        "managedFields": [
+          {
+            "apiVersion": "apps/v1",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:metadata": {
+                "f:annotations": {
+                  "f:kluctl.io/deployment-item-dir": {}
+                },
+                "f:labels": {
+                  "f:app.kubernetes.io/component": {},
+                  "f:app.kubernetes.io/name": {},
+                  "f:kluctl.io/discriminator": {},
+                  "f:kluctl.io/tag-0": {},
+                  "f:kluctl.io/tag-1": {},
+                  "f:podtato-head.kluctl.io/env-type": {},
+                  "f:podtato-head.kluctl.io/target": {}
+                }
+              },
+              "f:spec": {
+                "f:replicas": {},
+                "f:selector": {},
+                "f:template": {
+                  "f:metadata": {
+                    "f:labels": {
+                      "f:app.kubernetes.io/component": {},
+                      "f:app.kubernetes.io/name": {}
+                    }
+                  },
+                  "f:spec": {
+                    "f:containers": {
+                      "k:{\"name\":\"podtato-head-frontend\"}": {
+                        ".": {},
+                        "f:env": {
+                          "k:{\"name\":\"POD_NAME\"}": {
+                            ".": {},
+                            "f:name": {},
+                            "f:valueFrom": {
+                              "f:fieldRef": {}
+                            }
+                          },
+                          "k:{\"name\":\"PODTATO_COMPONENT\"}": {
+                            ".": {},
+                            "f:name": {},
+                            "f:value": {}
+                          },
+                          "k:{\"name\":\"SERVICES_CONFIG_FILE_PATH\"}": {
+                            ".": {},
+                            "f:name": {},
+                            "f:value": {}
+                          }
+                        },
+                        "f:image": {},
+                        "f:imagePullPolicy": {},
+                        "f:livenessProbe": {
+                          "f:httpGet": {
+                            "f:path": {},
+                            "f:port": {}
+                          }
+                        },
+                        "f:name": {},
+                        "f:ports": {
+                          "k:{\"containerPort\":8080,\"protocol\":\"TCP\"}": {
+                            ".": {},
+                            "f:containerPort": {},
+                            "f:name": {},
+                            "f:protocol": {}
+                          }
+                        },
+                        "f:readinessProbe": {
+                          "f:httpGet": {
+                            "f:path": {},
+                            "f:port": {}
+                          }
+                        },
+                        "f:resources": {},
+                        "f:volumeMounts": {
+                          "k:{\"mountPath\":\"/config\"}": {
+                            ".": {},
+                            "f:mountPath": {},
+                            "f:name": {}
+                          }
+                        }
+                      }
+                    },
+                    "f:serviceAccountName": {},
+                    "f:terminationGracePeriodSeconds": {},
+                    "f:volumes": {
+                      "k:{\"name\":\"service-discovery-map\"}": {
+                        ".": {},
+                        "f:configMap": {
+                          "f:name": {}
+                        },
+                        "f:name": {}
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "manager": "kluctl",
+            "operation": "Apply",
+            "time": "2023-03-22T11:39:54Z"
+          }
+        ],
+        "name": "podtato-head-frontend",
+        "namespace": "test-podtato-kluctl",
+        "uid": "1f984cff-c51e-44b7-b8f5-bdd26acacffc"
+      },
+      "spec": {
+        "progressDeadlineSeconds": 600,
+        "replicas": 1,
+        "revisionHistoryLimit": 10,
+        "selector": {
+          "matchLabels": {
+            "app.kubernetes.io/component": "frontend",
+            "app.kubernetes.io/name": "podtato-head"
+          }
+        },
+        "strategy": {
+          "rollingUpdate": {
+            "maxSurge": "25%",
+            "maxUnavailable": "25%"
+          },
+          "type": "RollingUpdate"
+        },
+        "template": {
+          "metadata": {
+            "creationTimestamp": null,
+            "labels": {
+              "app.kubernetes.io/component": "frontend",
+              "app.kubernetes.io/name": "podtato-head"
+            }
+          },
+          "spec": {
+            "containers": [
+              {
+                "env": [
+                  {
+                    "name": "PODTATO_COMPONENT",
+                    "value": "frontend"
+                  },
+                  {
+                    "name": "POD_NAME",
+                    "valueFrom": {
+                      "fieldRef": {
+                        "apiVersion": "v1",
+                        "fieldPath": "metadata.name"
+                      }
+                    }
+                  },
+                  {
+                    "name": "SERVICES_CONFIG_FILE_PATH",
+                    "value": "/config/servicesConfig.yaml"
+                  }
+                ],
+                "image": "ghcr.io/podtato-head/podtato-server:v0.3.1",
+                "imagePullPolicy": "IfNotPresent",
+                "livenessProbe": {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": "http",
+                    "scheme": "HTTP"
+                  },
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "name": "podtato-head-frontend",
+                "ports": [
+                  {
+                    "containerPort": 8080,
+                    "name": "http",
+                    "protocol": "TCP"
+                  }
+                ],
+                "readinessProbe": {
+                  "failureThreshold": 3,
+                  "httpGet": {
+                    "path": "/healthz",
+                    "port": "http",
+                    "scheme": "HTTP"
+                  },
+                  "periodSeconds": 10,
+                  "successThreshold": 1,
+                  "timeoutSeconds": 1
+                },
+                "resources": {},
+                "terminationMessagePath": "/dev/termination-log",
+                "terminationMessagePolicy": "File",
+                "volumeMounts": [
+                  {
+                    "mountPath": "/config",
+                    "name": "service-discovery-map"
+                  }
+                ]
+              }
+            ],
+            "dnsPolicy": "ClusterFirst",
+            "restartPolicy": "Always",
+            "schedulerName": "default-scheduler",
+            "securityContext": {},
+            "serviceAccount": "podtato-head",
+            "serviceAccountName": "podtato-head",
+            "terminationGracePeriodSeconds": 5,
+            "volumes": [
+              {
+                "configMap": {
+                  "defaultMode": 420,
+                  "name": "podtato-head-service-discovery"
+                },
+                "name": "service-discovery-map"
+              }
+            ]
+          }
+        }
+      },
+      "status": {}
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": {
+        "annotations": {
+          "kluctl.io/deployment-item-dir": "podtato-services/frontend",
+          "kluctl.io/validate-ignore": "true"
+        },
+        "creationTimestamp": "2023-03-22T11:39:54Z",
+        "labels": {
+          "app.kubernetes.io/component": "frontend",
+          "app.kubernetes.io/name": "podtato-head",
+          "kluctl.io/discriminator": "podtato-head-test",
+          "kluctl.io/tag-0": "podtato-services",
+          "kluctl.io/tag-1": "frontend",
+          "podtato-head.kluctl.io/env-type": "non-prod",
+          "podtato-head.kluctl.io/target": "test"
+        },
+        "managedFields": [
+          {
+            "apiVersion": "v1",
+            "fieldsType": "FieldsV1",
+            "fieldsV1": {
+              "f:metadata": {
+                "f:annotations": {
+                  "f:kluctl.io/deployment-item-dir": {},
+                  "f:kluctl.io/validate-ignore": {}
+                },
+                "f:labels": {
+                  "f:app.kubernetes.io/component": {},
+                  "f:app.kubernetes.io/name": {},
+                  "f:kluctl.io/discriminator": {},
+                  "f:kluctl.io/tag-0": {},
+                  "f:kluctl.io/tag-1": {},
+                  "f:podtato-head.kluctl.io/env-type": {},
+                  "f:podtato-head.kluctl.io/target": {}
+                }
+              },
+              "f:spec": {
+                "f:ports": {
+                  "k:{\"port\":9000,\"protocol\":\"TCP\"}": {
+                    ".": {},
+                    "f:name": {},
+                    "f:port": {},
+                    "f:protocol": {},
+                    "f:targetPort": {}
+                  }
+                },
+                "f:selector": {},
+                "f:type": {}
+              }
+            },
+            "manager": "kluctl",
+            "operation": "Apply",
+            "time": "2023-03-22T11:39:54Z"
+          }
+        ],
+        "name": "podtato-head-frontend",
+        "namespace": "test-podtato-kluctl",
+        "uid": "edcd0abd-7372-4724-a587-116f6a0b7b78"
+      },
+      "spec": {
+        "allocateLoadBalancerNodePorts": true,
+        "clusterIP": "10.96.0.0",
+        "clusterIPs": [
+          "10.96.0.0"
+        ],
+        "externalTrafficPolicy": "Cluster",
+        "internalTrafficPolicy": "Cluster",
+        "ipFamilies": [
+          "IPv4"
+        ],
+        "ipFamilyPolicy": "SingleStack",
+        "ports": [
+          {
+            "name": "http",
+            "nodePort": 32769,
+            "port": 9000,
+            "protocol": "TCP",
+            "targetPort": "http"
+          }
+        ],
+        "selector": {
+          "app.kubernetes.io/component": "frontend",
+          "app.kubernetes.io/name": "podtato-head"
+        },
+        "sessionAffinity": "None",
+        "type": "LoadBalancer"
+      },
+      "status": {
+        "loadBalancer": {}
+      }
+    }
+  ],
+  "changedObjects": [
+    {
+      "ref": {
+        "group": "",
+        "version": "v1",
+        "kind": "Service",
+        "name": "podtato-head-left-arm",
+        "namespace": "test-podtato-kluctl"
+      },
+      "changes": [
+        {
+          "type": "update",
+          "jsonPath": "spec.ports[0].port",
+          "oldValue": 9003,
+          "newValue": 9013,
+          "unifiedDiff": "-9003\n+9013"
+        }
+      ]
+    }
+  ],
+  "orphanObjects": [
+    {
+      "group": "apps",
+      "version": "v1",
+      "kind": "Deployment",
+      "name": "podtato-head-right-arm",
+      "namespace": "test-podtato-kluctl"
+    },
+    {
+      "group": "",
+      "version": "v1",
+      "kind": "Service",
+      "name": "podtato-head-right-arm",
+      "namespace": "test-podtato-kluctl"
+    }
+  ]
+}

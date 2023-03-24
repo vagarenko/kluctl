@@ -4,4 +4,24 @@
     border: 1px solid #555;
     border-radius: 5px;
     text-align: center;
+    width: 250px;
+    height: 110px;
+    padding: 8px;
+}
+
+.react-flow .react-flow__handle {
+    width: 20px;
+    height: 20px;
+    border-radius: 20px;
+    pointer-events: all;
+}
+
+.react-flow__handle-left {
+    left: -10px;
+}
+
+.react-flow__handle-right {
+    transform: none;
+    cursor: pointer;
+    right: -10px;
 }
