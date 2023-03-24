@@ -2,6 +2,8 @@
 import React, { memo, useCallback, useState } from 'react';
 import { Handle, NodeProps, Position, useReactFlow, Node, Edge, getOutgoers, getConnectedEdges } from 'reactflow';
 import { Typography } from '@mui/material';
+import AddCircleIcon from '@mui/icons-material/AddCircle';
+import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 
 import "./nodes.css"
 
@@ -20,17 +22,13 @@ export default memo((props: GenericNodeProps) => {
     const flow = useReactFlow();
     const [collapsedHandles, setCollapsedHandles] = useState<Set<string>>(new Set());
 
-    const onHandleClick = useCallback((handleId: string) => () => {
-        console.log(nodeProps, handleId);
-        let hidden: boolean;
+    const onHandleClick = useCallback((handleId: string, collapse: boolean) => () => {
         if (collapsedHandles.has(handleId)) {
             collapsedHandles.delete(handleId);
-            hidden = false;
         } else {
             collapsedHandles.add(handleId);
-            hidden = true;
         }
-        console.log(collapsedHandles);
+
         setCollapsedHandles(new Set(collapsedHandles));
 
         const node = flow.getNode(nodeProps.id)!;
@@ -46,7 +44,7 @@ export default memo((props: GenericNodeProps) => {
             if (childrenEdgesIds.has(e.id)) {
                 return {
                     ...e,
-                    hidden
+                    hidden: collapse
                 }
             }
             return e;
@@ -56,7 +54,7 @@ export default memo((props: GenericNodeProps) => {
             if (childrenNodesIds.has(n.id)) {
                 return {
                     ...n,
-                    hidden
+                    hidden: collapse
                 }
             }
             return n;
@@ -79,20 +77,49 @@ export default memo((props: GenericNodeProps) => {
                 type="target"
                 position={Position.Left}
                 id={leftHandleId}
-                style={{ background: '#555' }}
+                style={{ background: '#ccc' }}
                 isConnectable={false}
             />}
 
             {rightHandleIds && rightHandleIds.map((id, index) =>
-                <Handle
-                    key={id}
-                    type="source"
-                    position={Position.Right}
-                    id={id}
-                    style={{ bottom: 'auto', top: handlesGap * (index + 1) - 10, background: '#555' }}
-                    isConnectable={false}
-                    onClick={onHandleClick(id)}
-                />
+                <div key={id}>
+                    <Handle
+                        type="source"
+                        position={Position.Right}
+                        id={id}
+                        style={{ bottom: 'auto', top: handlesGap * (index + 1) - 10, background: '#ccc' }}
+                        isConnectable={false}
+                    />
+                    {collapsedHandles.has(id)
+                        ? <AddCircleIcon
+                            sx={{
+                                width: 20,
+                                height: 20,
+                                position: "absolute",
+                                right: -10,
+                                bottom: 'auto',
+                                top: handlesGap * (index + 1) - 10,
+                                color: 'blue',
+                                cursor: 'pointer'
+                            }}
+                            onClick={onHandleClick(id, false)}
+                        />
+                        : <RemoveCircleIcon
+                            sx={{
+                                width: 20,
+                                height: 20,
+                                position: "absolute",
+                                right: -10,
+                                bottom: 'auto',
+                                top: handlesGap * (index + 1) - 10,
+                                color: 'blue',
+                                cursor: 'pointer'
+                            }}
+                            onClick={onHandleClick(id, true)}
+                        />
+                    }
+
+                </div>
             )}
         </>
     );

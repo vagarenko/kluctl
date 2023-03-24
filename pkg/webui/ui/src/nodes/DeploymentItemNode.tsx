@@ -19,7 +19,7 @@ export default memo((props: NodeProps<DeploymentItemNodeData>) => {
                 objectCount: {props.data.deploymentItem.renderedObjects?.length}<br />
             </>}
             leftHandleId="parent"
-            rightHandleIds={["vars", "objects"]}
+            rightHandleIds={["vars", "deployments"]}
             nodeProps={props}
         />
     );

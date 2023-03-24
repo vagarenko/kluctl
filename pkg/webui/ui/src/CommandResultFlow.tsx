@@ -1,6 +1,6 @@
-import { addEdge, Connection, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState, Node, Edge, getOutgoers, getConnectedEdges } from "reactflow";
-import { useCallback, useEffect } from "react";
-import { buildCommandResultNode, NodeData } from "./nodes/buildNodes";
+import { addEdge, Connection, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState } from "reactflow";
+import { useCallback, useEffect, useMemo } from "react";
+import { buildCommandResultNode } from "./nodes/buildNodes";
 import { CommandResult } from "./models";
 
 import testResult from './test-result.json';
@@ -11,14 +11,18 @@ const defaultViewport = { x: 0, y: 0, zoom: 1 };
 const initBgColor = '#1A192B';
 
 const CommandResultFlow = () => {
-    let commandResult = new CommandResult(testResult)
+    const commandResult = useMemo(() => new CommandResult(testResult), []);
 
-    const [initialNodes, initialEdges, nodeTypes] = buildCommandResultNode(commandResult)
+    const [initialNodes, initialEdges, nodeTypes] = useMemo(() =>
+        buildCommandResultNode(commandResult), [commandResult]
+    );
 
     const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
     const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
-    layoutNodes(nodes, edges)
+    layoutNodes(nodes, edges);
+
+    console.log(nodes, edges);
 
     useEffect(() => {
         setNodes(nodes);

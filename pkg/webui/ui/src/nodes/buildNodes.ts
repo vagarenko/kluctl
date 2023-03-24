@@ -64,6 +64,7 @@ function buildDeploymentProjectNode(nodes: Node<NodeData>[], edges: Edge[], comm
         type: edgeType,
         source: parentNode.id,
         target: node.id,
+        sourceHandle: "deployments"
     })
 
     deploymentProjectConfig.vars?.forEach(function (varsSource) {
@@ -135,6 +136,6 @@ function buildObjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: 
         type: edgeType,
         source: parentNode.id,
         target: node.id,
-        sourceHandle: "objects",
+        sourceHandle: "deployments",
     })
 }
