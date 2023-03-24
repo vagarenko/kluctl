@@ -371,7 +371,7 @@ func (a *ApplyUtil) ApplyObject(x *uo.UnstructuredObject, replaced bool, hook bo
 		_ = r.ReplaceValues(tmpName, ref.Name)
 		r.SetK8sNamespace(ref.Namespace)
 	}
-	if r != nil && ref.GVK.GroupKind().String() == "Namespace" {
+	if r != nil && ref.GroupKind().String() == "Namespace" {
 		a.allNamespaces.Store(ref.Name, r)
 	}
 	a.handleApiWarnings(ref, apiWarnings)
@@ -474,7 +474,9 @@ func (a *ApplyUtil) applyDeploymentItem(d *deployment.DeploymentItem) {
 	for _, x := range d.Config.DeleteObjects {
 		for _, gvk := range a.k.Resources.GetFilteredGVKs(k8s.BuildGVKFilter(x.Group, nil, x.Kind)) {
 			ref := k8s2.ObjectRef{
-				GVK:       gvk,
+				Group:     gvk.Group,
+				Version:   gvk.Version,
+				Kind:      gvk.Kind,
 				Name:      x.Name,
 				Namespace: x.Namespace,
 			}

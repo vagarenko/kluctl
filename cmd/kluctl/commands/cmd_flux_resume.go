@@ -27,7 +27,7 @@ func (cmd *fluxResumeCmd) Run(ctx context.Context) error {
 		return err
 	}
 
-	ref := k8s2.ObjectRef{GVK: args.KluctlDeploymentGVK, Name: kd, Namespace: ns}
+	ref := k8s2.NewObjectRef(args.GitRepositoryGVK.Group, args.GitRepositoryGVK.Version, args.GitRepositoryGVK.Kind, kd, ns)
 
 	patch := []k8s.JsonPatch{{
 		Op:    "replace",
