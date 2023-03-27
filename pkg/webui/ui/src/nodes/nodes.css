@@ -10,19 +10,11 @@
 }
 
 .react-flow .react-flow__handle {
-    width: 20px;
-    height: 20px;
-    border-radius: 20px;
     border: none;
     pointer-events: all;
-}
-
-.react-flow__handle-left {
-    left: -10px;
 }
 
 .react-flow__handle-right {
     transform: none;
     cursor: pointer;
-    right: -10px;
 }

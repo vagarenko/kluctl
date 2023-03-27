@@ -53,17 +53,17 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
             attributionPosition="bottom-left"
         >
             <MiniMap
-                /*nodeStrokeColor={(n) => {
-                    if (n.type === 'input') return '#0041d0';
-                    if (n.type === 'selectorNode') return bgColor;
-                    if (n.type === 'output') return '#ff0072';
-                }}*/
-                /*nodeColor={(n) => {
-                    //if (n.type === 'selectorNode') return bgColor;
-                    return '#fff';
-                }}*/
+            /*nodeStrokeColor={(n) => {
+                if (n.type === 'input') return '#0041d0';
+                if (n.type === 'selectorNode') return bgColor;
+                if (n.type === 'output') return '#ff0072';
+            }}*/
+            /*nodeColor={(n) => {
+                //if (n.type === 'selectorNode') return bgColor;
+                return '#fff';
+            }}*/
             />
-            <Controls/>
+            <Controls />
         </ReactFlow>
     );
 };

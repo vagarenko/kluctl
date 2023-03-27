@@ -7,11 +7,14 @@ import DeploymentItemNode, { DeploymentItemNodeData } from "./DeploymentItemNode
 import ObjectNode, { ObjectNodeData } from "./ObjectNode";
 
 export type NodeData =
-    | CommandResultNodeData
-    | DeploymentProjectNodeData
-    | VarsSourceNodeData
-    | DeploymentItemNodeData
-    | ObjectNodeData
+    (   | CommandResultNodeData
+        | DeploymentProjectNodeData
+        | VarsSourceNodeData
+        | DeploymentItemNodeData
+        | ObjectNodeData
+    ) & {
+        collapsedHandles?: Set<string>;
+    }
 
 
 export const nodeTypes = {

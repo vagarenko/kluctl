@@ -13,7 +13,7 @@ const App = () => {
             let firstId = ids[0]
             setResultId(firstId)
         })
-    })
+    }, []);
 
     return (
         <div className="layoutflow">
