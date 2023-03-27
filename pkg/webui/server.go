@@ -27,7 +27,6 @@ type SplittedCommandResult struct {
 
 	RenderedObjects map[k8s.ObjectRef]*uo.UnstructuredObject
 	NewObjects      map[k8s.ObjectRef]*uo.UnstructuredObject
-	ChangedObjects  map[k8s.ObjectRef]*result.ChangedObject
 	HookObjects     map[k8s.ObjectRef]*uo.UnstructuredObject
 }
 
@@ -44,28 +43,42 @@ func splitCommandResult(r *result.CommandResult) (string, *SplittedCommandResult
 		ReducedResult:   *r,
 		RenderedObjects: map[k8s.ObjectRef]*uo.UnstructuredObject{},
 		NewObjects:      map[k8s.ObjectRef]*uo.UnstructuredObject{},
-		ChangedObjects:  map[k8s.ObjectRef]*result.ChangedObject{},
 		HookObjects:     map[k8s.ObjectRef]*uo.UnstructuredObject{},
 	}
-	sr.ReducedResult.RenderedObjects = nil
-	sr.ReducedResult.NewObjects = nil
-	sr.ReducedResult.ChangedObjects = nil
-	sr.ReducedResult.HookObjects = nil
+	sr.ReducedResult.RenderedObjects = make([]*uo.UnstructuredObject, 0, len(r.RenderedObjects))
+	sr.ReducedResult.NewObjects = make([]*uo.UnstructuredObject, 0, len(r.NewObjects))
+	sr.ReducedResult.HookObjects = make([]*uo.UnstructuredObject, 0, len(r.HookObjects))
 
 	for _, o := range r.RenderedObjects {
+		sr.ReducedResult.RenderedObjects = append(sr.ReducedResult.RenderedObjects, buildReducedObject(o))
 		sr.RenderedObjects[o.GetK8sRef()] = o
 	}
 	for _, o := range r.NewObjects {
+		sr.ReducedResult.NewObjects = append(sr.ReducedResult.NewObjects, buildReducedObject(o))
 		sr.NewObjects[o.GetK8sRef()] = o
 	}
-	for _, o := range r.ChangedObjects {
-		sr.ChangedObjects[o.Ref] = o
-	}
 	for _, o := range r.HookObjects {
+		sr.ReducedResult.HookObjects = append(sr.ReducedResult.HookObjects, buildReducedObject(o))
 		sr.HookObjects[o.GetK8sRef()] = o
 	}
 
 	return hs, sr, nil
+}
+
+func buildReducedObject(o *uo.UnstructuredObject) *uo.UnstructuredObject {
+	ref := o.GetK8sRef()
+	m := map[string]any{
+		"apiVersion": ref.GroupVersion().String(),
+		"kind":       ref.Kind,
+		"metadata": map[string]any{
+			"name": ref.Name,
+		},
+	}
+	ret := uo.FromMap(m)
+	if ref.Namespace != "" {
+		ret.SetK8sNamespace(ref.Namespace)
+	}
+	return ret
 }
 
 type SimpleCommandResultsSource struct {
@@ -116,9 +129,6 @@ func (s *CommandResultsServer) Run(ctx context.Context, port int) error {
 	})
 	api.GET("/getNewObject", func(c *gin.Context) {
 		s.getObject(c, "rendered")
-	})
-	api.GET("/getChangedObject", func(c *gin.Context) {
-		s.getObject(c, "changed")
 	})
 	api.GET("/getHookObject", func(c *gin.Context) {
 		s.getObject(c, "hook")
@@ -224,8 +234,6 @@ func (s *CommandResultsServer) getObject(c *gin.Context, objectType string) {
 		o = sr.RenderedObjects[ref.toK8sRef()]
 	case "new":
 		o = sr.NewObjects[ref.toK8sRef()]
-	case "changed":
-		o = sr.ChangedObjects[ref.toK8sRef()]
 	case "hook":
 		o = sr.HookObjects[ref.toK8sRef()]
 	}

@@ -11,7 +11,7 @@ export class ObjectNodeData extends NodeData {
     objectRef: ObjectRef
 
     constructor(commandResult: CommandResult, objectRef: ObjectRef) {
-        super();
+        super(true, true);
         this.commandResult = commandResult
         this.objectRef = objectRef
     }

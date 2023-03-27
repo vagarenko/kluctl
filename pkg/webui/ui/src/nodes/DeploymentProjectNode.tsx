@@ -11,7 +11,7 @@ export class DeploymentProjectNodeData extends NodeData {
     deploymentProject: DeploymentProjectConfig
 
     constructor(commandResult: CommandResult, deploymentProject: DeploymentProjectConfig) {
-        super();
+        super(true, true);
         this.commandResult = commandResult
         this.deploymentProject = deploymentProject
     }

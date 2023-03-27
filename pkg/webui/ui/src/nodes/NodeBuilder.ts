@@ -134,9 +134,9 @@ export class NodeBuilder {
         let co = this.changedObjectsMap[buildObjectRefKey(objectRef)]
         if (co === undefined) {
             // TODO fix this (should be based on commandResult.newObjects)
-            node.data.diffStatus.newObjects.push(objectRef)
+            // node.data.diffStatus?.newObjects.push(objectRef)
         } else {
-            node.data.diffStatus.addChangedObject(co)
+            node.data.diffStatus?.addChangedObject(co)
         }
 
         return node

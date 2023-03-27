@@ -11,7 +11,7 @@ export class VarsSourceNodeData extends NodeData {
     varsSource: VarsSource
 
     constructor(commandResult: CommandResult, varsSource: VarsSource) {
-        super();
+        super(false, false);
         this.commandResult = commandResult
         this.varsSource = varsSource
     }

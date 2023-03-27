@@ -10,7 +10,7 @@ export class CommandResultNodeData extends NodeData {
     commandResult: CommandResult
 
     constructor(commandResult: CommandResult) {
-        super();
+        super(true, true);
         this.commandResult = commandResult
     }
 }

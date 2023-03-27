@@ -2,7 +2,7 @@ import { ChangedObject, DeploymentError, ObjectRef } from "../models";
 
 export class DiffStatus  {
     newObjects: ObjectRef[] = [];
-    removedObjects: ObjectRef[] = [];
+    deletedObjects: ObjectRef[] = [];
     orphanObjects: ObjectRef[] = [];
     changedObjects: ChangedObject[] = [];
 
@@ -29,7 +29,7 @@ export class DiffStatus  {
 
     merge(other: DiffStatus) {
         this.newObjects = this.newObjects.concat(other.newObjects)
-        this.removedObjects = this.removedObjects.concat(other.removedObjects)
+        this.deletedObjects = this.deletedObjects.concat(other.deletedObjects)
         this.orphanObjects = this.orphanObjects.concat(other.orphanObjects)
         this.changedObjects = this.changedObjects.concat(other.changedObjects)
 
@@ -45,14 +45,22 @@ export class HealthStatus {
 }
 
 export abstract class NodeData {
-    healthStatus: HealthStatus = new HealthStatus();
-    diffStatus: DiffStatus = new DiffStatus();
+    healthStatus?: HealthStatus;
+    diffStatus?: DiffStatus;
     collapsedHandles?: Set<string>;
 
-    protected constructor() {
+    protected constructor(hasHealthStatus: boolean, hasDiffStatus: boolean) {
+        if (hasHealthStatus) {
+            this.healthStatus = new HealthStatus()
+        }
+        if (hasDiffStatus) {
+            this.diffStatus = new DiffStatus()
+        }
     }
 
     merge(other: NodeData) {
-        this.diffStatus.merge(other.diffStatus)
+        if (this.diffStatus && other.diffStatus) {
+            this.diffStatus.merge(other.diffStatus)
+        }
     }
 }

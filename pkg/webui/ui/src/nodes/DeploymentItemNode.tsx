@@ -11,7 +11,7 @@ export class DeploymentItemNodeData extends NodeData {
     deploymentItem: DeploymentItemConfig
 
     constructor(commandResult: CommandResult, deploymentItem: DeploymentItemConfig) {
-        super();
+        super(true, true);
         this.commandResult = commandResult
         this.deploymentItem = deploymentItem
     }
@@ -23,7 +23,6 @@ export default memo((props: NodeProps<DeploymentItemNodeData>) => {
             header="DeploymentItem"
             body={<>
                 path: {props.data.deploymentItem.path}<br />
-                objectCount: {props.data.deploymentItem.renderedObjects?.length}<br />
             </>}
             leftHandleId="parent"
             rightHandleIds={["vars", "deployments"]}
