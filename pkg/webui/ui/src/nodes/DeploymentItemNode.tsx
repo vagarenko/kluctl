@@ -4,10 +4,17 @@ import { NodeProps } from 'reactflow';
 import "./nodes.css"
 import { CommandResult, DeploymentItemConfig } from "../models";
 import GenericNode from './GenericNode';
+import { NodeData } from "./buildNodes";
 
-export type DeploymentItemNodeData = {
+export class DeploymentItemNodeData extends NodeData {
     commandResult: CommandResult
     deploymentItem: DeploymentItemConfig
+
+    constructor(commandResult: CommandResult, deploymentItem: DeploymentItemConfig) {
+        super();
+        this.commandResult = commandResult
+        this.deploymentItem = deploymentItem
+    }
 }
 
 export default memo((props: NodeProps<DeploymentItemNodeData>) => {

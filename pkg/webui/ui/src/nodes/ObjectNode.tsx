@@ -4,10 +4,17 @@ import { NodeProps } from 'reactflow';
 import "./nodes.css"
 import {CommandResult, ObjectRef} from "../models";
 import GenericNode from './GenericNode';
+import { NodeData } from "./buildNodes";
 
-export type ObjectNodeData = {
+export class ObjectNodeData extends NodeData {
     commandResult: CommandResult
     objectRef: ObjectRef
+
+    constructor(commandResult: CommandResult, objectRef: ObjectRef) {
+        super();
+        this.commandResult = commandResult
+        this.objectRef = objectRef
+    }
 }
 
 export default memo((props: NodeProps<ObjectNodeData>) => {

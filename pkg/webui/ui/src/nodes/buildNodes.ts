@@ -1,20 +1,84 @@
 import { Edge, Node } from 'reactflow';
-import { CommandResult, DeploymentItemConfig, DeploymentProjectConfig, ObjectRef, VarsSource } from "../models";
+import {
+    ChangedObject,
+    CommandResult,
+    DeploymentError,
+    DeploymentItemConfig,
+    DeploymentProjectConfig,
+    ObjectRef,
+    VarsSource
+} from "../models";
 import CommandResultNode, { CommandResultNodeData } from "./CommandResultNode";
 import DeploymentProjectNode, { DeploymentProjectNodeData } from "./DeploymentProjectNode";
 import VarsSourceNode, { VarsSourceNodeData } from "./VarsSourceNode";
 import DeploymentItemNode, { DeploymentItemNodeData } from "./DeploymentItemNode";
 import ObjectNode, { ObjectNodeData } from "./ObjectNode";
 
-export type NodeData =
-    (   | CommandResultNodeData
-        | DeploymentProjectNodeData
-        | VarsSourceNodeData
-        | DeploymentItemNodeData
-        | ObjectNodeData
-    ) & {
-        collapsedHandles?: Set<string>;
+export class DiffStatus  {
+    newObjects: ObjectRef[] = [];
+    removedObjects: ObjectRef[] = [];
+    orphanObjects: ObjectRef[] = [];
+    changedObjects: ChangedObject[] = [];
+
+    totalInsertions: number = 0;
+    totalDeletions: number = 0;
+    totalUpdates: number = 0;
+
+    set(newObjects: ObjectRef[],
+        removedObjects: ObjectRef[],
+        orphanObjects: ObjectRef[],
+        changedObjects: ChangedObject[]) {
+        this.newObjects = newObjects
+        this.removedObjects = removedObjects
+        this.orphanObjects = orphanObjects
+        this.changedObjects = changedObjects
+
+        changedObjects.forEach(c => {
+            c.changes?.forEach(x => {
+                switch (x.type) {
+                    case "insert":
+                        this.totalInsertions++
+                        break
+                    case "delete":
+                        this.totalDeletions++
+                        break
+                    case "update":
+                        this.totalUpdates++
+                        break
+                }
+            })
+        })
     }
+
+    merge(other: DiffStatus) {
+        this.newObjects = this.newObjects.concat(other.newObjects)
+        this.removedObjects = this.removedObjects.concat(other.removedObjects)
+        this.orphanObjects = this.orphanObjects.concat(other.orphanObjects)
+        this.changedObjects = this.changedObjects.concat(other.changedObjects)
+
+        this.totalInsertions += other.totalInsertions
+        this.totalDeletions += other.totalDeletions
+        this.totalUpdates += other.totalUpdates
+    }
+}
+
+export class HealthStatus {
+    errors: Map<string, DeploymentError> = new Map()
+    warnings: Map<string, DeploymentError> = new Map()
+}
+
+export abstract class NodeData {
+    healthStatus: HealthStatus = new HealthStatus();
+    diffStatus: DiffStatus = new DiffStatus();
+    collapsedHandles?: Set<string>;
+
+    protected constructor() {
+    }
+
+    merge(other: NodeData) {
+        this.diffStatus.merge(other.diffStatus)
+    }
+}
 
 
 export const nodeTypes = {
@@ -43,21 +107,22 @@ export function buildCommandResultNode(commandResult: CommandResult): [Node<Node
     let rootNode: Node<CommandResultNodeData> = {
         id: genNextId().toString(),
         type: "commandResult",
-        data: { commandResult: commandResult },
+        data: new CommandResultNodeData(commandResult),
         position,
     }
     nodes.push(rootNode)
 
-    buildDeploymentProjectNode(nodes, edges, commandResult, rootNode, commandResult.deployment!)
+    let child = buildDeploymentProjectNode(nodes, edges, commandResult, rootNode, commandResult.deployment!)
+    rootNode.data.merge(child.data)
 
     return [nodes, edges]
 }
 
-function buildDeploymentProjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, deploymentProjectConfig: DeploymentProjectConfig) {
+function buildDeploymentProjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, deploymentProjectConfig: DeploymentProjectConfig): Node<NodeData> {
     let node: Node<DeploymentProjectNodeData> = {
         id: genNextId(),
         type: "deploymentProject",
-        data: { commandResult: commandResult, deploymentProject: deploymentProjectConfig },
+        data: new DeploymentProjectNodeData(commandResult, deploymentProjectConfig),
         position
     }
 
@@ -71,18 +136,22 @@ function buildDeploymentProjectNode(nodes: Node<NodeData>[], edges: Edge[], comm
     })
 
     deploymentProjectConfig.vars?.forEach(function (varsSource) {
-        buildVarsSourceNode(nodes, edges, commandResult, node, varsSource)
+        let child = buildVarsSourceNode(nodes, edges, commandResult, node, varsSource)
+        node.data.merge(child.data)
     })
     deploymentProjectConfig.deployments?.forEach(function (deploymentItem) {
-        buildDeploymentItemNode(nodes, edges, commandResult, node, deploymentItem)
+        let child = buildDeploymentItemNode(nodes, edges, commandResult, node, deploymentItem)
+        node.data.merge(child.data)
     })
+
+    return node
 }
 
-function buildVarsSourceNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, varsSource: VarsSource) {
+function buildVarsSourceNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, varsSource: VarsSource): Node<NodeData> {
     let node: Node<VarsSourceNodeData> = {
         id: genNextId(),
         type: "varsSource",
-        data: { commandResult: commandResult, varsSource: varsSource },
+        data: new VarsSourceNodeData(commandResult, varsSource),
         position
     }
 
@@ -94,13 +163,15 @@ function buildVarsSourceNode(nodes: Node<NodeData>[], edges: Edge[], commandResu
         target: node.id,
         sourceHandle: "vars",
     })
+
+    return node
 }
 
-function buildDeploymentItemNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, deploymentItem: DeploymentItemConfig) {
+function buildDeploymentItemNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, deploymentItem: DeploymentItemConfig): Node<NodeData> {
     let node: Node<DeploymentItemNodeData> = {
         id: genNextId(),
         type: "deploymentItem",
-        data: { commandResult: commandResult, deploymentItem: deploymentItem },
+        data: new DeploymentItemNodeData(commandResult, deploymentItem),
         position
     }
 
@@ -114,22 +185,27 @@ function buildDeploymentItemNode(nodes: Node<NodeData>[], edges: Edge[], command
     })
 
     if (deploymentItem.renderedInclude !== undefined) {
-        buildDeploymentProjectNode(nodes, edges, commandResult, node, deploymentItem.renderedInclude)
+        let child = buildDeploymentProjectNode(nodes, edges, commandResult, node, deploymentItem.renderedInclude)
+        node.data.merge(child.data)
     }
 
     deploymentItem.vars?.forEach(function (varsSource) {
-        buildVarsSourceNode(nodes, edges, commandResult, node, varsSource)
+        let child = buildVarsSourceNode(nodes, edges, commandResult, node, varsSource)
+        node.data.merge(child.data)
     })
     deploymentItem.renderedObjects?.forEach(function (renderedObject) {
-        buildObjectNode(nodes, edges, commandResult, node, renderedObject)
+        let child = buildObjectNode(nodes, edges, commandResult, node, renderedObject)
+        node.data.merge(child.data)
     })
+
+    return node
 }
 
-function buildObjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, objectRef: ObjectRef) {
+function buildObjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, objectRef: ObjectRef): Node<NodeData> {
     let node: Node<ObjectNodeData> = {
         id: genNextId(),
         type: "object",
-        data: { commandResult: commandResult, objectRef: objectRef },
+        data: new ObjectNodeData(commandResult, objectRef),
         position
     }
 
@@ -141,4 +217,6 @@ function buildObjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: 
         target: node.id,
         sourceHandle: "deployments",
     })
+
+    return node
 }

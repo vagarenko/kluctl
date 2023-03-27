@@ -4,10 +4,17 @@ import { NodeProps } from 'reactflow';
 import "./nodes.css"
 import { CommandResult, VarsSource } from "../models";
 import GenericNode from './GenericNode';
+import { NodeData } from "./buildNodes";
 
-export type VarsSourceNodeData = {
+export class VarsSourceNodeData extends NodeData {
     commandResult: CommandResult
     varsSource: VarsSource
+
+    constructor(commandResult: CommandResult, varsSource: VarsSource) {
+        super();
+        this.commandResult = commandResult
+        this.varsSource = varsSource
+    }
 }
 
 export default memo((props: NodeProps<VarsSourceNodeData>) => {

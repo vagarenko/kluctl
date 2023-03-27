@@ -4,9 +4,15 @@ import { NodeProps } from 'reactflow';
 import "./nodes.css"
 import { CommandResult } from "../models";
 import GenericNode from './GenericNode';
+import { NodeData } from "./buildNodes";
 
-export type CommandResultNodeData = {
+export class CommandResultNodeData extends NodeData {
     commandResult: CommandResult
+
+    constructor(commandResult: CommandResult) {
+        super();
+        this.commandResult = commandResult
+    }
 }
 
 export default memo((props: NodeProps<CommandResultNodeData>) => {
