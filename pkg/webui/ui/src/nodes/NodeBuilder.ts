@@ -5,7 +5,7 @@ import {
     DeploymentError,
     DeploymentItemConfig,
     DeploymentProjectConfig,
-    ObjectRef,
+    ObjectRef, UnstructuredObject,
     VarsSource
 } from "../models";
 import CommandResultNode, { CommandResultNodeData } from "./CommandResultNode";
@@ -28,11 +28,22 @@ const edgeType = 'default';
 
 export class NodeBuilder {
     private commandResult: CommandResult
+    private newObjectsMap: {[key:string]:UnstructuredObject} = {}
+    private changedObjectsMap: {[key:string]:ChangedObject} = {}
+
     private nodes: Node<NodeData>[] = []
     private edges: Edge[] = []
 
     constructor(commandResult: CommandResult) {
         this.commandResult = commandResult
+
+        commandResult.newObjects?.forEach(no => {
+            let ref = buildObjectRefFromObject(no)
+            this.newObjectsMap[buildObjectRefKey(ref)] = no
+        })
+        commandResult.changedObjects?.forEach(co => {
+            this.changedObjectsMap[buildObjectRefKey(co.ref)] = co
+        })
     }
 
     nextId: number = 1
@@ -119,6 +130,35 @@ export class NodeBuilder {
     buildObjectNode(parentNode: Node<NodeData>, objectRef: ObjectRef): Node<NodeData> {
         let node = this.buildNode("object", new ObjectNodeData(this.commandResult, objectRef))
         this.buildEdge(parentNode, node, "deployments")
+
+        let co = this.changedObjectsMap[buildObjectRefKey(objectRef)]
+        if (co === undefined) {
+            // TODO fix this (should be based on commandResult.newObjects)
+            node.data.diffStatus.newObjects.push(objectRef)
+        } else {
+            node.data.diffStatus.addChangedObject(co)
+        }
+
         return node
     }
+}
+
+function buildObjectRefFromObject(obj: UnstructuredObject): ObjectRef {
+    const apiVersion: string = obj.object.apiVersion
+    const s = apiVersion.split("/", 2)
+    let ref = new ObjectRef()
+    if (s.length == 1) {
+        ref.version = s[0]
+    } else {
+        ref.group = s[0]
+        ref.version = s[1]
+    }
+    ref.kind = obj.object.kind
+    ref.namespace = obj.object.metadata.namespace
+    ref.name = obj.object.metadata.name
+    return ref
+}
+
+function buildObjectRefKey(ref: ObjectRef): string {
+    return [ref.group, ref.version, ref.kind, ref.namespace, ref.name].join("+")
 }

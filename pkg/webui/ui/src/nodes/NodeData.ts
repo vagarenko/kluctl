@@ -10,29 +10,20 @@ export class DiffStatus  {
     totalDeletions: number = 0;
     totalUpdates: number = 0;
 
-    set(newObjects: ObjectRef[],
-        removedObjects: ObjectRef[],
-        orphanObjects: ObjectRef[],
-        changedObjects: ChangedObject[]) {
-        this.newObjects = newObjects
-        this.removedObjects = removedObjects
-        this.orphanObjects = orphanObjects
-        this.changedObjects = changedObjects
-
-        changedObjects.forEach(c => {
-            c.changes?.forEach(x => {
-                switch (x.type) {
-                    case "insert":
-                        this.totalInsertions++
-                        break
-                    case "delete":
-                        this.totalDeletions++
-                        break
-                    case "update":
-                        this.totalUpdates++
-                        break
-                }
-            })
+    addChangedObject(co: ChangedObject) {
+        this.changedObjects.push(co)
+        co.changes?.forEach(x => {
+            switch (x.type) {
+                case "insert":
+                    this.totalInsertions++
+                    break
+                case "delete":
+                    this.totalDeletions++
+                    break
+                case "update":
+                    this.totalUpdates++
+                    break
+            }
         })
     }
 
