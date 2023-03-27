@@ -40,8 +40,13 @@ export class DiffStatus  {
 }
 
 export class HealthStatus {
-    errors: Map<string, DeploymentError> = new Map()
-    warnings: Map<string, DeploymentError> = new Map()
+    errors: DeploymentError[] = []
+    warnings: DeploymentError[] = []
+
+    merge(other: HealthStatus) {
+        this.errors = this.errors.concat(other.errors)
+        this.warnings = this.warnings.concat(other.warnings)
+    }
 }
 
 export abstract class NodeData {
@@ -61,6 +66,9 @@ export abstract class NodeData {
     merge(other: NodeData) {
         if (this.diffStatus && other.diffStatus) {
             this.diffStatus.merge(other.diffStatus)
+        }
+        if (this.healthStatus && other.healthStatus) {
+            this.healthStatus.merge(other.healthStatus)
         }
     }
 }

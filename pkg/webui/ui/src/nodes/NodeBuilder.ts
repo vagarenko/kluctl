@@ -30,6 +30,8 @@ export class NodeBuilder {
     private commandResult: CommandResult
     private newObjectsMap: {[key:string]:UnstructuredObject} = {}
     private changedObjectsMap: {[key:string]:ChangedObject} = {}
+    private errorsMap: {[key:string]:DeploymentError[]} = {}
+    private warningsMap: {[key:string]:DeploymentError[]} = {}
 
     private nodes: Node<NodeData>[] = []
     private edges: Edge[] = []
@@ -43,6 +45,20 @@ export class NodeBuilder {
         })
         commandResult.changedObjects?.forEach(co => {
             this.changedObjectsMap[buildObjectRefKey(co.ref)] = co
+        })
+        commandResult.errors?.forEach(e => {
+            const key = buildObjectRefKey(e.ref)
+            if (this.errorsMap[key] === undefined) {
+                this.errorsMap[key] = []
+            }
+            this.errorsMap[key].push(e)
+        })
+        commandResult.warnings?.forEach(e => {
+            const key = buildObjectRefKey(e.ref)
+            if (this.warningsMap[key] === undefined) {
+                this.warningsMap[key] = []
+            }
+            this.warningsMap[key].push(e)
         })
     }
 
@@ -131,13 +147,21 @@ export class NodeBuilder {
         let node = this.buildNode("object", new ObjectNodeData(this.commandResult, objectRef))
         this.buildEdge(parentNode, node, "deployments")
 
-        let co = this.changedObjectsMap[buildObjectRefKey(objectRef)]
+        const key = buildObjectRefKey(objectRef)
+        let co = this.changedObjectsMap[key]
         if (co === undefined) {
             // TODO fix this (should be based on commandResult.newObjects)
             // node.data.diffStatus?.newObjects.push(objectRef)
         } else {
             node.data.diffStatus?.addChangedObject(co)
         }
+
+        this.errorsMap[key]?.forEach(e => {
+            node.data.healthStatus?.errors.push(e)
+        })
+        this.warningsMap[key]?.forEach(e => {
+            node.data.healthStatus?.warnings.push(e)
+        })
 
         return node
     }

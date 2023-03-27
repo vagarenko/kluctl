@@ -127,10 +127,10 @@ export default memo((props: GenericNodeProps) => {
             {nodeProps.data.diffStatus &&
                 <>
                     new/deleted: {nodeProps.data.diffStatus.newObjects.length}/{nodeProps.data.diffStatus.deletedObjects.length}<br/>
-                    changes: -{nodeProps.data.diffStatus.totalDeletions},+{nodeProps.data.diffStatus.totalInsertions},±{nodeProps.data.diffStatus.totalUpdates}
+                    changes: -{nodeProps.data.diffStatus.totalDeletions},+{nodeProps.data.diffStatus.totalInsertions},±{nodeProps.data.diffStatus.totalUpdates}<br/>
+                    errors/warnings: {nodeProps.data.healthStatus?.errors.length}/{nodeProps.data.healthStatus?.warnings.length}
                 </>
             }
-
 
             {leftHandleId && <Handle
                 type="target"
