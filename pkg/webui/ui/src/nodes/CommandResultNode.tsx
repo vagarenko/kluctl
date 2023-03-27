@@ -4,7 +4,7 @@ import { NodeProps } from 'reactflow';
 import "./nodes.css"
 import { CommandResult } from "../models";
 import GenericNode from './GenericNode';
-import { NodeData } from "./buildNodes";
+import { NodeData } from "./NodeData";
 
 export class CommandResultNodeData extends NodeData {
     commandResult: CommandResult

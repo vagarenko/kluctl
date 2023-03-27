@@ -1,6 +1,6 @@
 import { Box, Divider, Drawer, IconButton } from "@mui/material";
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
-import { NodeData } from "./nodes/buildNodes";
+import { NodeData } from "./nodes/NodeData";
 import { Node } from "reactflow";
 import Typography from "@mui/material/Typography";
 

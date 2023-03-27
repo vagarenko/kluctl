@@ -1,10 +1,11 @@
 import { addEdge, Connection, Controls, MiniMap, NodeChange, NodeMouseHandler, NodeSelectionChange, ReactFlow, useEdgesState, useNodesState } from "reactflow";
 import { useCallback, useEffect, useState } from "react";
-import { buildCommandResultNode, NodeData, nodeTypes } from "./nodes/buildNodes";
 import { Node } from "reactflow";
 import { layoutNodes } from "./nodes/layout";
 import { getResult } from "./api";
 import { SidePanel } from "./SidePanel";
+import { NodeBuilder, nodeTypes } from "./nodes/NodeBuilder";
+import { NodeData } from "./nodes/NodeData";
 
 const connectionLineStyle = { stroke: '#fff' };
 const defaultViewport = { x: 0, y: 0, zoom: 1 };
@@ -21,7 +22,8 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
     useEffect(() => {
         getResult(props.resultId)
             .then(commandResult => {
-                const [newNodes, newEdges] = buildCommandResultNode(commandResult)
+                const builder = new NodeBuilder(commandResult)
+                const [newNodes, newEdges] = builder.buildRoot()
 
                 layoutNodes(newNodes, newEdges);
 

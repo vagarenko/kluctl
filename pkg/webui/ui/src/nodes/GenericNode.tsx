@@ -9,7 +9,7 @@ import { calcLayout } from './layout';
 import { timer } from 'd3-timer';
 import { EXPAND_COLLAPSE_TRANSITION_DURATION, NODE_HANDLE_SIZE, NODE_HEIGHT } from '../constants';
 import { SxProps } from '@mui/material/styles';
-import { NodeData } from './buildNodes';
+import { NodeData } from './NodeData';
 
 const ICON_STYLE: SxProps = {
     width: NODE_HANDLE_SIZE,
