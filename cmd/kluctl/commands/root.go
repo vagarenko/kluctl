@@ -67,6 +67,7 @@ type cli struct {
 	Seal        sealCmd        `cmd:"" help:"Seal secrets based on target's sealingConfig"`
 	Validate    validateCmd    `cmd:"" help:"Validates the already deployed deployment"`
 	Flux        fluxCmd        `cmd:"" help:"Flux sub-commands"`
+	Webui       webuiCmd       `cmd:"" help:"TODO"`
 
 	Version versionCmd `cmd:"" help:"Print kluctl version"`
 }

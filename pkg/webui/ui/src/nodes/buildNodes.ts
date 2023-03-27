@@ -1,5 +1,5 @@
 import { Edge, Node } from 'reactflow';
-import { CommandResult, DeploymentItemConfig, DeploymentProjectConfig, VarsSource } from "../models";
+import { CommandResult, DeploymentItemConfig, DeploymentProjectConfig, ObjectRef, VarsSource } from "../models";
 import CommandResultNode, { CommandResultNodeData } from "./CommandResultNode";
 import DeploymentProjectNode, { DeploymentProjectNodeData } from "./DeploymentProjectNode";
 import VarsSourceNode, { VarsSourceNodeData } from "./VarsSourceNode";
@@ -14,7 +14,7 @@ export type NodeData =
     | ObjectNodeData
 
 
-const nodeTypes = {
+export const nodeTypes = {
     commandResult: CommandResultNode,
     deploymentProject: DeploymentProjectNode,
     varsSource: VarsSourceNode,
@@ -33,7 +33,7 @@ function genNextId(): string {
     return id.toString()
 }
 
-export function buildCommandResultNode(commandResult: CommandResult): [Node<NodeData>[], Edge[], any] {
+export function buildCommandResultNode(commandResult: CommandResult): [Node<NodeData>[], Edge[]] {
     let nodes: Node<NodeData>[] = []
     let edges: Edge[] = []
 
@@ -47,7 +47,7 @@ export function buildCommandResultNode(commandResult: CommandResult): [Node<Node
 
     buildDeploymentProjectNode(nodes, edges, commandResult, rootNode, commandResult.deployment!)
 
-    return [nodes, edges, nodeTypes]
+    return [nodes, edges]
 }
 
 function buildDeploymentProjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, deploymentProjectConfig: DeploymentProjectConfig) {
@@ -122,11 +122,11 @@ function buildDeploymentItemNode(nodes: Node<NodeData>[], edges: Edge[], command
     })
 }
 
-function buildObjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, renderedObject: any) {
+function buildObjectNode(nodes: Node<NodeData>[], edges: Edge[], commandResult: CommandResult, parentNode: Node<NodeData>, objectRef: ObjectRef) {
     let node: Node<ObjectNodeData> = {
         id: genNextId(),
         type: "object",
-        data: { commandResult: commandResult, renderedObject: renderedObject },
+        data: { commandResult: commandResult, objectRef: objectRef },
         position
     }
 

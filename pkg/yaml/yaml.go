@@ -131,6 +131,18 @@ func WriteYamlFile(p string, o interface{}) error {
 	return WriteYamlAllFile(p, []interface{}{o})
 }
 
+func WriteYamlStream(w io.Writer, o interface{}) error {
+	b, err := yaml.Marshal(o)
+	if err != nil {
+		return err
+	}
+	_, err = w.Write(b)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func WriteYamlAllFile(p string, l []interface{}) error {
 	w, err := os.Create(p)
 	if err != nil {
@@ -167,11 +179,7 @@ func WriteYamlAllStream(w io.Writer, l []interface{}) error {
 				return err
 			}
 		}
-		b, err := yaml.Marshal(o)
-		if err != nil {
-			return err
-		}
-		_, err = w.Write(b)
+		err := WriteYamlStream(w, o)
 		if err != nil {
 			return err
 		}
