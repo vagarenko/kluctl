@@ -43,7 +43,9 @@ export default memo((props: GenericNodeProps) => {
     const handlesGap = rightHandleIds ? Math.floor(NODE_HEIGHT / (rightHandleIds.length + 1)) : 0;
     const flow = useReactFlow();
 
-    const onHandleClick = useCallback((handleId: string, collapse: boolean) => () => {
+    const onHandleClick = useCallback((handleId: string, collapse: boolean) => (event: React.MouseEvent) => {
+        event.stopPropagation();
+
         const node = flow.getNode(nodeProps.id)!;
 
         const collapsedHandles = new Set(node.data.collapsedHandles);

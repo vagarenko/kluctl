@@ -1,9 +1,10 @@
-import { addEdge, Connection, Controls, MiniMap, ReactFlow, useEdgesState, useNodesState } from "reactflow";
-import { useCallback, useEffect } from "react";
-import { buildCommandResultNode, nodeTypes } from "./nodes/buildNodes";
-
+import { addEdge, Connection, Controls, MiniMap, NodeChange, NodeMouseHandler, NodeSelectionChange, ReactFlow, useEdgesState, useNodesState } from "reactflow";
+import { useCallback, useEffect, useState } from "react";
+import { buildCommandResultNode, NodeData, nodeTypes } from "./nodes/buildNodes";
+import { Node } from "reactflow";
 import { layoutNodes } from "./nodes/layout";
 import { getResult } from "./api";
+import { SidePanel } from "./SidePanel";
 
 const connectionLineStyle = { stroke: '#fff' };
 const defaultViewport = { x: 0, y: 0, zoom: 1 };
@@ -35,36 +36,58 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
         [setEdges]
     );
 
+    const [sidePanelNode, setSidePanelNode] = useState<Node<NodeData> | null>(null);
+    const onSidePanelClose = useCallback(() => {
+        setSidePanelNode(null);
+    }, []);
+
+    const handleNodesChange = useCallback((nodeChanges: NodeChange[]) => {
+        const selectChanges = nodeChanges.filter((change) => change.type === 'select') as NodeSelectionChange[];
+        if (selectChanges.length === 1 && selectChanges[0].selected === false) {
+            setSidePanelNode(null);
+        }
+
+        onNodesChange(nodeChanges);
+    }, [onNodesChange]);
+
+    const onNodeClick: NodeMouseHandler  = useCallback((e, node) => {
+        setSidePanelNode(node);
+    }, []);
+
     return (
-        <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            onConnect={onConnect}
-            style={{ background: initBgColor }}
-            nodeTypes={nodeTypes}
-            nodesConnectable={false}
-            connectionLineStyle={connectionLineStyle}
-            //snapToGrid={true}
-            //snapGrid={snapGrid}
-            defaultViewport={defaultViewport}
-            fitView
-            attributionPosition="bottom-left"
-        >
-            <MiniMap
-            /*nodeStrokeColor={(n) => {
-                if (n.type === 'input') return '#0041d0';
-                if (n.type === 'selectorNode') return bgColor;
-                if (n.type === 'output') return '#ff0072';
-            }}*/
-            /*nodeColor={(n) => {
-                //if (n.type === 'selectorNode') return bgColor;
-                return '#fff';
-            }}*/
-            />
-            <Controls />
-        </ReactFlow>
+        <div style={{ width: "100%", height: "100%", position: "relative" }}>
+            <ReactFlow
+                nodes={nodes}
+                edges={edges}
+                onNodesChange={handleNodesChange}
+                onNodeClick={onNodeClick}
+                onEdgesChange={onEdgesChange}
+                onConnect={onConnect}
+                style={{ background: initBgColor }}
+                nodeTypes={nodeTypes}
+                nodesConnectable={false}
+                connectionLineStyle={connectionLineStyle}
+                //snapToGrid={true}
+                //snapGrid={snapGrid}
+                defaultViewport={defaultViewport}
+                fitView
+                attributionPosition="bottom-left"
+            >
+                <MiniMap
+                /*nodeStrokeColor={(n) => {
+                    if (n.type === 'input') return '#0041d0';
+                    if (n.type === 'selectorNode') return bgColor;
+                    if (n.type === 'output') return '#ff0072';
+                }}*/
+                /*nodeColor={(n) => {
+                    //if (n.type === 'selectorNode') return bgColor;
+                    return '#fff';
+                }}*/
+                />
+                <Controls />
+            </ReactFlow>
+            <SidePanel node={sidePanelNode} onClose={onSidePanelClose} />
+        </div>
     );
 };
 
