@@ -3,12 +3,12 @@
 
 export class DeploymentError {
     ref: ObjectRef;
-    error: string;
+    message: string;
 
     constructor(source: any = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
         this.ref = this.convertValues(source["ref"], ObjectRef);
-        this.error = source["error"];
+        this.message = source["message"];
     }
 
 	convertValues(a: any, classs: any, asMap: boolean = false): any {
