@@ -134,34 +134,16 @@ export class DeleteObjectItemConfig {
     }
 }
 export class GitProject {
-    url: GitUrl;
+    url: string;
     ref?: string;
     subDir?: string;
 
     constructor(source: any = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.url = this.convertValues(source["url"], GitUrl);
+        this.url = source;
         this.ref = source["ref"];
         this.subDir = source["subDir"];
     }
-
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
-	    if (!a) {
-	        return a;
-	    }
-	    if (a.slice) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
-	    } else if ("object" === typeof a) {
-	        if (asMap) {
-	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
-	            }
-	            return a;
-	        }
-	        return new classs(a);
-	    }
-	    return a;
-	}
 }
 export class DeploymentItemConfig {
     path?: string;
@@ -177,7 +159,7 @@ export class DeploymentItemConfig {
     deleteObjects?: DeleteObjectItemConfig[];
     when?: string;
     renderedHelmChartConfig?: HelmChartConfig;
-    renderedObjects?: UnstructuredObject[];
+    renderedObjects?: ObjectRef[];
     renderedInclude?: DeploymentProjectConfig;
 
     constructor(source: any = {}) {
@@ -195,7 +177,7 @@ export class DeploymentItemConfig {
         this.deleteObjects = this.convertValues(source["deleteObjects"], DeleteObjectItemConfig);
         this.when = source["when"];
         this.renderedHelmChartConfig = this.convertValues(source["renderedHelmChartConfig"], HelmChartConfig);
-        this.renderedObjects = this.convertValues(source["renderedObjects"], UnstructuredObject);
+        this.renderedObjects = this.convertValues(source["renderedObjects"], ObjectRef);
         this.renderedInclude = this.convertValues(source["renderedInclude"], DeploymentProjectConfig);
     }
 
@@ -245,6 +227,14 @@ export class VarsSourceAwsSecretsManager {
         this.secretName = source["secretName"];
         this.region = source["region"];
         this.profile = source["profile"];
+    }
+}
+export class Userinfo {
+
+
+    constructor(source: any = {}) {
+        if ('string' === typeof source) source = JSON.parse(source);
+
     }
 }
 export class YamlUrl {
@@ -341,89 +331,17 @@ export class VarsSourceClusterConfigMapOrSecret {
         this.key = source["key"];
     }
 }
-export class Userinfo {
-
-
-    constructor(source: any = {}) {
-        if ('string' === typeof source) source = JSON.parse(source);
-
-    }
-}
-export class GitUrl {
-    Scheme: string;
-    Opaque: string;
-    User: Userinfo;
-    Host: string;
-    Path: string;
-    RawPath: string;
-    OmitHost: boolean;
-    ForceQuery: boolean;
-    RawQuery: string;
-    Fragment: string;
-    RawFragment: string;
-
-    constructor(source: any = {}) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        this.Scheme = source["Scheme"];
-        this.Opaque = source["Opaque"];
-        this.User = this.convertValues(source["User"], Userinfo);
-        this.Host = source["Host"];
-        this.Path = source["Path"];
-        this.RawPath = source["RawPath"];
-        this.OmitHost = source["OmitHost"];
-        this.ForceQuery = source["ForceQuery"];
-        this.RawQuery = source["RawQuery"];
-        this.Fragment = source["Fragment"];
-        this.RawFragment = source["RawFragment"];
-    }
-
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
-	    if (!a) {
-	        return a;
-	    }
-	    if (a.slice) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
-	    } else if ("object" === typeof a) {
-	        if (asMap) {
-	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
-	            }
-	            return a;
-	        }
-	        return new classs(a);
-	    }
-	    return a;
-	}
-}
 export class VarsSourceGit {
-    url: GitUrl;
+    url: string;
     ref?: string;
     path: string;
 
     constructor(source: any = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.url = this.convertValues(source["url"], GitUrl);
+        this.url = source;
         this.ref = source["ref"];
         this.path = source["path"];
     }
-
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
-	    if (!a) {
-	        return a;
-	    }
-	    if (a.slice) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
-	    } else if ("object" === typeof a) {
-	        if (asMap) {
-	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
-	            }
-	            return a;
-	        }
-	        return new classs(a);
-	    }
-	    return a;
-	}
 }
 export class VarsSource {
     ignoreMissing?: boolean;
@@ -515,47 +433,21 @@ export class DeploymentProjectConfig {
 	    return a;
 	}
 }
-export class GroupVersionKind {
-    Group: string;
-    Version: string;
-    Kind: string;
-
-    constructor(source: any = {}) {
-        if ('string' === typeof source) source = JSON.parse(source);
-        this.Group = source["Group"];
-        this.Version = source["Version"];
-        this.Kind = source["Kind"];
-    }
-}
 export class ObjectRef {
-    gvk: GroupVersionKind;
-    Name: string;
-    Namespace: string;
+    group: string;
+    version: string;
+    kind: string;
+    name: string;
+    namespace: string;
 
     constructor(source: any = {}) {
         if ('string' === typeof source) source = JSON.parse(source);
-        this.gvk = this.convertValues(source["gvk"], GroupVersionKind);
-        this.Name = source["Name"];
-        this.Namespace = source["Namespace"];
+        this.group = source["group"];
+        this.version = source["version"];
+        this.kind = source["kind"];
+        this.name = source["name"];
+        this.namespace = source["namespace"];
     }
-
-	convertValues(a: any, classs: any, asMap: boolean = false): any {
-	    if (!a) {
-	        return a;
-	    }
-	    if (a.slice) {
-	        return (a as any[]).map(elem => this.convertValues(elem, classs));
-	    } else if ("object" === typeof a) {
-	        if (asMap) {
-	            for (const key of Object.keys(a)) {
-	                a[key] = new classs(a[key]);
-	            }
-	            return a;
-	        }
-	        return new classs(a);
-	    }
-	    return a;
-	}
 }
 export class FixedImage {
     image: string;
@@ -750,6 +642,7 @@ export class CommandInfo {
 export class CommandResult {
     command?: CommandInfo;
     deployment?: DeploymentProjectConfig;
+    renderedObjects?: UnstructuredObject[];
     newObjects?: UnstructuredObject[];
     changedObjects?: ChangedObject[];
     hookObjects?: UnstructuredObject[];
@@ -763,6 +656,7 @@ export class CommandResult {
         if ('string' === typeof source) source = JSON.parse(source);
         this.command = this.convertValues(source["command"], CommandInfo);
         this.deployment = this.convertValues(source["deployment"], DeploymentProjectConfig);
+        this.renderedObjects = this.convertValues(source["renderedObjects"], UnstructuredObject);
         this.newObjects = this.convertValues(source["newObjects"], UnstructuredObject);
         this.changedObjects = this.convertValues(source["changedObjects"], ChangedObject);
         this.hookObjects = this.convertValues(source["hookObjects"], UnstructuredObject);

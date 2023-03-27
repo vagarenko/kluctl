@@ -2,12 +2,12 @@ import React, { memo } from 'react';
 import { NodeProps } from 'reactflow';
 
 import "./nodes.css"
-import { CommandResult } from "../models";
+import {CommandResult, ObjectRef} from "../models";
 import GenericNode from './GenericNode';
 
 export type ObjectNodeData = {
     commandResult: CommandResult
-    renderedObject: any
+    objectRef: ObjectRef
 }
 
 export default memo((props: NodeProps<ObjectNodeData>) => {
@@ -15,10 +15,11 @@ export default memo((props: NodeProps<ObjectNodeData>) => {
         <GenericNode
             header="Object"
             body={<>
-                apiVersion: {props.data.renderedObject.object.apiVersion}<br />
-                kind: {props.data.renderedObject.object.kind}<br />
-                name: {props.data.renderedObject.object.metadata.name}<br />
-                namespace: {props.data.renderedObject.object.metadata.namespace!}<br />
+                group: {props.data.objectRef.group}<br />
+                version: {props.data.objectRef.version}<br />
+                kind: {props.data.objectRef.kind}<br />
+                name: {props.data.objectRef.name}<br />
+                namespace: {props.data.objectRef.namespace!}<br />
             </>}
             leftHandleId="parent"
             nodeProps={props}
