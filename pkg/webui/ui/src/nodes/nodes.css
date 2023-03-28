@@ -4,9 +4,6 @@
     border: 1px solid #555;
     border-radius: 5px;
     text-align: center;
-    width: 250px;
-    height: 110px;
-    padding: 8px;
 }
 
 .react-flow .react-flow__handle {

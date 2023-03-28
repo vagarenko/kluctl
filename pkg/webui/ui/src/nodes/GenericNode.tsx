@@ -1,15 +1,16 @@
 
 import React, { CSSProperties, memo, useCallback } from 'react';
 import { Handle, NodeProps, Position, useReactFlow, Node, Edge, getConnectedEdges, XYPosition } from 'reactflow';
-import { Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import "./nodes.css"
 import { calcLayout } from './layout';
 import { timer } from 'd3-timer';
-import { EXPAND_COLLAPSE_TRANSITION_DURATION, NODE_HANDLE_SIZE, NODE_HEIGHT } from '../constants';
+import { EXPAND_COLLAPSE_TRANSITION_DURATION, NODE_HANDLE_SIZE, NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { SxProps } from '@mui/material/styles';
 import { NodeData } from './NodeData';
+import { NodeStatus } from './NodeStatus';
 
 const ICON_STYLE: SxProps = {
     width: NODE_HANDLE_SIZE,
@@ -117,19 +118,28 @@ export default memo((props: GenericNodeProps) => {
     }, [data, flow, nodeProps.id])
 
     return (
-        <>
-            <Typography gutterBottom variant="h6" component="div">
-                {nodeProps.id}: {header}
+        <Box
+            display="flex"
+            flexDirection="column"
+            width={NODE_WIDTH}
+            height={NODE_HEIGHT}
+            padding={`12px ${NODE_HANDLE_SIZE}px`}
+            textAlign="left"
+        >
+            <Typography variant="h6" component="div" flex="0 0 auto">
+                {header}
             </Typography>
-            <Typography variant="body1" color="text.secondary">
+            <Typography variant="body1" color="text.secondary" flex="1 1 auto" overflow="hidden">
                 {body}
             </Typography>
+
             {nodeProps.data.diffStatus &&
-                <>
-                    new/deleted: {nodeProps.data.diffStatus.newObjects.length}/{nodeProps.data.diffStatus.deletedObjects.length}<br/>
-                    changes: -{nodeProps.data.diffStatus.totalDeletions},+{nodeProps.data.diffStatus.totalInsertions},±{nodeProps.data.diffStatus.totalUpdates}<br/>
-                    errors/warnings: {nodeProps.data.healthStatus?.errors.length}/{nodeProps.data.healthStatus?.warnings.length}
-                </>
+                <Box display="flex" flexDirection="column" flex="0 0 auto">
+                    <NodeStatus
+                        diffStatus={nodeProps.data.diffStatus}
+                        healthStatus={nodeProps.data.healthStatus}
+                    />
+                </Box>
             }
 
             {leftHandleId && <Handle
@@ -174,7 +184,7 @@ export default memo((props: GenericNodeProps) => {
 
                 </div>
             )}
-        </>
+        </Box>
     );
 });
 

@@ -171,7 +171,7 @@ function buildObjectRefFromObject(obj: UnstructuredObject): ObjectRef {
     const apiVersion: string = obj.object.apiVersion
     const s = apiVersion.split("/", 2)
     let ref = new ObjectRef()
-    if (s.length == 1) {
+    if (s.length === 1) {
         ref.version = s[0]
     } else {
         ref.group = s[0]
