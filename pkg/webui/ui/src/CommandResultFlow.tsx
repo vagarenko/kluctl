@@ -4,7 +4,7 @@ import { Node } from "reactflow";
 import { layoutNodes } from "./nodes/layout";
 import { getResult } from "./api";
 import { SidePanel } from "./SidePanel";
-import { NodeBuilder, nodeTypes } from "./nodes/NodeBuilder";
+import { NodeBuilder, NodeType, nodeTypes } from "./nodes/NodeBuilder";
 import { NodeData } from "./nodes/NodeData";
 
 const connectionLineStyle = { stroke: '#fff' };
@@ -38,7 +38,7 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
         [setEdges]
     );
 
-    const [sidePanelNode, setSidePanelNode] = useState<Node<NodeData> | null>(null);
+    const [sidePanelNode, setSidePanelNode] = useState<Node<NodeData, NodeType> | null>(null);
     const onSidePanelClose = useCallback(() => {
         setSidePanelNode(null);
     }, []);
@@ -52,7 +52,7 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
         onNodesChange(nodeChanges);
     }, [onNodesChange]);
 
-    const onNodeClick: NodeMouseHandler  = useCallback((e, node) => {
+    const onNodeClick  = useCallback((e: React.MouseEvent, node: Node<NodeData, NodeType>) => {
         setSidePanelNode(node);
     }, []);
 
@@ -62,7 +62,7 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
                 nodes={nodes}
                 edges={edges}
                 onNodesChange={handleNodesChange}
-                onNodeClick={onNodeClick}
+                onNodeClick={onNodeClick as NodeMouseHandler}
                 onEdgesChange={onEdgesChange}
                 onConnect={onConnect}
                 style={{ background: initBgColor }}

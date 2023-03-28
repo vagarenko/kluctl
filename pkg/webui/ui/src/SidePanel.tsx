@@ -1,18 +1,29 @@
-import { Box, Divider, Drawer, IconButton } from "@mui/material";
+import { Box, Divider, Drawer, IconButton, Tab, Tabs, Typography } from "@mui/material";
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import { NodeData } from "./nodes/NodeData";
 import { Node } from "reactflow";
-import Typography from "@mui/material/Typography";
+import { useCallback, useEffect, useState } from "react";
+import { NodeType } from "./nodes/NodeBuilder";
 
 export interface SidePanelProps {
-    node: Node<NodeData> | null;
+    node: Node<NodeData, NodeType> | null;
     onClose: () => void;
 }
 
 export function SidePanel(props: SidePanelProps) {
     const { onClose, node } = props;
 
-    return <div>
+    const [selectedTab, setSelectedTab] = useState(0);
+
+    const handleTabChange = useCallback((_e: React.SyntheticEvent, tab: number) => {
+        setSelectedTab(tab);
+    }, []);
+
+    useEffect(() => {
+        setSelectedTab(0);
+    }, [node]);
+
+    return <Box>
         <Drawer
             sx={{
                 width: 500,
@@ -32,18 +43,39 @@ export function SidePanel(props: SidePanelProps) {
             </Box>
             <Divider />
             <Box display="flex" flexDirection="column" flex="1 1 auto" overflow="hidden" p={3}>
-                <Typography variant="h4" mb={3}>
-                    {node?.type}
-                </Typography>
-                <Box display="flex" flexDirection="column" flex="1 1 auto" overflow="auto">
-                    {node && getContent(node)}
-                </Box>
+                {node &&
+                    <>
+                        <Typography variant="h4" mb={1} component="div">
+                            {node.type}
+                        </Typography>
+
+                        <Box flex="0 0 auto" sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                            <Tabs
+                                value={node?.type === "object" ? selectedTab : 0}
+                                onChange={handleTabChange}
+                            >
+                                <Tab label="Info" key={0} />
+                                {node.type === "object" &&
+                                    [
+                                        <Tab label="Rendered" key={1} />,
+                                        <Tab label="Applied" key={2} />,
+                                        <Tab label="Changes" key={3} />,
+                                    ]
+                                }
+                            </Tabs>
+                        </Box>
+
+                        <Box mt={2} mx={2} display="flex" flexDirection="column" flex="1 1 auto" overflow="auto">
+                            {selectedTab === 0 && node && getContent(node)}
+                        </Box>
+                    </>
+                }
             </Box>
         </Drawer>
-    </div>
+    </Box>
 }
 
-function getContent(node: Node<NodeData>): React.ReactElement | null {
+function getContent(node: Node<NodeData, NodeType>): React.ReactElement | null {
     const data = node.data as any;
     switch (node.type) {
         case "commandResult":

@@ -11,6 +11,7 @@ import { EXPAND_COLLAPSE_TRANSITION_DURATION, NODE_HANDLE_SIZE, NODE_HEIGHT, NOD
 import { SxProps } from '@mui/material/styles';
 import { NodeData } from './NodeData';
 import { NodeStatus } from './NodeStatus';
+import { NodeType } from './NodeBuilder';
 
 const ICON_STYLE: SxProps = {
     width: NODE_HANDLE_SIZE,
@@ -47,7 +48,7 @@ export default memo((props: GenericNodeProps) => {
     const onHandleClick = useCallback((handleId: string, collapse: boolean) => (event: React.MouseEvent) => {
         event.stopPropagation();
 
-        const node = flow.getNode(nodeProps.id)!;
+        const node = flow.getNode(nodeProps.id) as Node<NodeData, NodeType>;
 
         const collapsedHandles = new Set(node.data.collapsedHandles);
         if (collapse) {
@@ -65,7 +66,7 @@ export default memo((props: GenericNodeProps) => {
                     collapsedHandles
                 }
             }
-        ];
+        ] as Node<NodeData, NodeType>[];
         const edges = flow.getEdges();
 
         const [childrenNodes, childrenEdges] = getChildrenNodesAndEdgesFromHandle(node, handleId, nodes, edges);
@@ -189,12 +190,12 @@ export default memo((props: GenericNodeProps) => {
 });
 
 function getChildrenNodesAndEdgesFromHandle(
-    node: Node<NodeData>,
+    node: Node<NodeData, NodeType>,
     handleId: string,
-    nodes: Node<NodeData>[],
+    nodes: Node<NodeData, NodeType>[],
     edges: Edge[]
-): [Node<NodeData>[], Edge[]] {
-    const resultNodes: Node<NodeData>[] = [];
+): [Node<NodeData, NodeType>[], Edge[]] {
+    const resultNodes: Node<NodeData, NodeType>[] = [];
     const resultEdges: Edge[] = [];
 
     const edgesToDirectChildren = getEdgesToDirectChildrenFromHandle(node, handleId, edges)
@@ -216,7 +217,7 @@ function getChildrenNodesAndEdgesFromHandle(
 }
 
 function getEdgesToDirectChildrenFromHandle(
-    node: Node<NodeData>,
+    node: Node<NodeData, NodeType>,
     handleId: string,
     edges: Edge[]
 ): Edge[] {
@@ -228,11 +229,11 @@ function getEdgesToDirectChildrenFromHandle(
 }
 
 function getChildrenNodesAndEdges(
-    node: Node<NodeData>,
-    nodes: Node<NodeData>[],
+    node: Node<NodeData, NodeType>,
+    nodes: Node<NodeData, NodeType>[],
     edges: Edge[]
-): [Node<NodeData>[], Edge[]] {
-    const resultNodes: Node<NodeData>[] = [];
+): [Node<NodeData, NodeType>[], Edge[]] {
+    const resultNodes: Node<NodeData, NodeType>[] = [];
     const resultEdges: Edge[] = [];
 
     const edgesToDirectChildren = getConnectedEdges([node], edges)

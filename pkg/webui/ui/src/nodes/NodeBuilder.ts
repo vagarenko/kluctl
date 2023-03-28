@@ -23,6 +23,8 @@ export const nodeTypes = {
     object: ObjectNode,
 };
 
+export type NodeType = keyof typeof nodeTypes 
+
 const position = { x: 0, y: 0 };
 const edgeType = 'default';
 
@@ -33,7 +35,7 @@ export class NodeBuilder {
     private errorsMap: {[key:string]:DeploymentError[]} = {}
     private warningsMap: {[key:string]:DeploymentError[]} = {}
 
-    private nodes: Node<NodeData>[] = []
+    private nodes: Node<NodeData, NodeType>[] = []
     private edges: Edge[] = []
 
     constructor(commandResult: CommandResult) {
@@ -69,8 +71,8 @@ export class NodeBuilder {
         return id.toString()
     }
 
-    buildNode<T extends NodeData>(type: string, data: T): Node<T> {
-        let node: Node<T> = {
+    buildNode<T extends NodeData, U extends NodeType>(type: U, data: T): Node<T, U> {
+        let node: Node<T, U> = {
             id: this.genNextId().toString(),
             type: type,
             data: data,
@@ -91,7 +93,7 @@ export class NodeBuilder {
         })
     }
 
-    buildRoot(): [Node<NodeData>[], Edge[]] {
+    buildRoot(): [Node<NodeData, NodeType>[], Edge[]] {
         let rootNode = this.buildNode("commandResult", new CommandResultNodeData(this.commandResult))
 
         let child = this.buildDeploymentProjectNode(rootNode, this.commandResult.deployment!)
@@ -100,7 +102,7 @@ export class NodeBuilder {
         return [this.nodes, this.edges]
     }
 
-    buildDeploymentProjectNode(parentNode: Node<NodeData>, deploymentProjectConfig: DeploymentProjectConfig): Node<NodeData> {
+    buildDeploymentProjectNode(parentNode: Node<NodeData, NodeType>, deploymentProjectConfig: DeploymentProjectConfig): Node<NodeData, NodeType> {
         let node = this.buildNode("deploymentProject", new DeploymentProjectNodeData(this.commandResult, deploymentProjectConfig))
         this.buildEdge(parentNode, node, "deployments")
 
@@ -116,13 +118,13 @@ export class NodeBuilder {
         return node
     }
 
-    buildVarsSourceNode(parentNode: Node<NodeData>, varsSource: VarsSource): Node<NodeData> {
+    buildVarsSourceNode(parentNode: Node<NodeData, NodeType>, varsSource: VarsSource): Node<NodeData, NodeType> {
         let node = this.buildNode("varsSource", new VarsSourceNodeData(this.commandResult, varsSource))
         this.buildEdge(parentNode, node, "vars")
         return node
     }
 
-    buildDeploymentItemNode(parentNode: Node<NodeData>, deploymentItem: DeploymentItemConfig): Node<NodeData> {
+    buildDeploymentItemNode(parentNode: Node<NodeData, NodeType>, deploymentItem: DeploymentItemConfig): Node<NodeData, NodeType> {
         let node = this.buildNode("deploymentItem", new DeploymentItemNodeData(this.commandResult, deploymentItem))
         this.buildEdge(parentNode, node, "deployments")
 
@@ -143,7 +145,7 @@ export class NodeBuilder {
         return node
     }
 
-    buildObjectNode(parentNode: Node<NodeData>, objectRef: ObjectRef): Node<NodeData> {
+    buildObjectNode(parentNode: Node<NodeData, NodeType>, objectRef: ObjectRef): Node<NodeData, NodeType> {
         let node = this.buildNode("object", new ObjectNodeData(this.commandResult, objectRef))
         this.buildEdge(parentNode, node, "deployments")
 
