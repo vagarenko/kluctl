@@ -4,6 +4,7 @@ import { NodeData } from "./nodes/NodeData";
 import { Node } from "reactflow";
 import { useCallback, useEffect, useState } from "react";
 import { NodeType } from "./nodes/NodeBuilder";
+import { TOP_BAR_HEIGHT } from "./constants";
 
 export interface SidePanelProps {
     node: Node<NodeData, NodeType> | null;
@@ -23,56 +24,55 @@ export function SidePanel(props: SidePanelProps) {
         setSelectedTab(0);
     }, [node]);
 
-    return <Box>
-        <Drawer
-            sx={{
+    return <Drawer
+        sx={{
+            width: 500,
+            flexShrink: 0,
+            '& .MuiDrawer-paper': {
                 width: 500,
-                flexShrink: 0,
-                '& .MuiDrawer-paper': {
-                    width: 500,
-                },
-            }}
-            variant="persistent"
-            anchor="right"
-            open={!!node}
-        >
-            <Box height="40px">
-                <IconButton onClick={onClose}>
-                    <ChevronRightIcon />
-                </IconButton>
-            </Box>
-            <Divider />
-            <Box display="flex" flexDirection="column" flex="1 1 auto" overflow="hidden" p={3}>
-                {node &&
-                    <>
-                        <Typography variant="h4" mb={1} component="div">
-                            {node.type}
-                        </Typography>
+                marginTop: `${TOP_BAR_HEIGHT}px`,
+            },
+        }}
+        variant="persistent"
+        anchor="right"
+        open={!!node}
+    >
+        <Box height="40px">
+            <IconButton onClick={onClose}>
+                <ChevronRightIcon />
+            </IconButton>
+        </Box>
+        <Divider />
+        <Box display="flex" flexDirection="column" flex="1 1 auto" overflow="hidden" p={3}>
+            {node &&
+                <>
+                    <Typography variant="h4" mb={1} component="div">
+                        {node.type}
+                    </Typography>
 
-                        <Box flex="0 0 auto" sx={{ borderBottom: 1, borderColor: 'divider' }}>
-                            <Tabs
-                                value={node?.type === "object" ? selectedTab : 0}
-                                onChange={handleTabChange}
-                            >
-                                <Tab label="Info" key={0} />
-                                {node.type === "object" &&
-                                    [
-                                        <Tab label="Rendered" key={1} />,
-                                        <Tab label="Applied" key={2} />,
-                                        <Tab label="Changes" key={3} />,
-                                    ]
-                                }
-                            </Tabs>
-                        </Box>
+                    <Box flex="0 0 auto" sx={{ borderBottom: 1, borderColor: 'divider' }}>
+                        <Tabs
+                            value={node?.type === "object" ? selectedTab : 0}
+                            onChange={handleTabChange}
+                        >
+                            <Tab label="Info" key={0} />
+                            {node.type === "object" &&
+                                [
+                                    <Tab label="Rendered" key={1} />,
+                                    <Tab label="Applied" key={2} />,
+                                    <Tab label="Changes" key={3} />,
+                                ]
+                            }
+                        </Tabs>
+                    </Box>
 
-                        <Box mt={2} mx={2} display="flex" flexDirection="column" flex="1 1 auto" overflow="auto">
-                            {selectedTab === 0 && node && getContent(node)}
-                        </Box>
-                    </>
-                }
-            </Box>
-        </Drawer>
-    </Box>
+                    <Box mt={2} mx={2} display="flex" flexDirection="column" flex="1 1 auto" overflow="auto">
+                        {selectedTab === 0 && node && getContent(node)}
+                    </Box>
+                </>
+            }
+        </Box>
+    </Drawer>
 }
 
 function getContent(node: Node<NodeData, NodeType>): React.ReactElement | null {

@@ -165,6 +165,20 @@ export class NodeBuilder {
             node.data.healthStatus?.warnings.push(e)
         })
 
+        // TODO: remove this.
+        if (Math.random() > 0.5) {
+            node.data.diffStatus?.newObjects.push(...Array(Math.floor(Math.random() * 10)));
+        }
+        if (Math.random() > 0.5) {
+            node.data.diffStatus?.deletedObjects.push(...Array(Math.floor(Math.random() * 10)));
+        }
+        if (Math.random() > 0.5) {
+            node.data.healthStatus?.errors.push(...Array(Math.floor(Math.random() * 10)));
+        }
+        if (Math.random() > 0.5) {
+            node.data.healthStatus?.warnings.push(...Array(Math.floor(Math.random() * 10)));
+        }
+
         return node
     }
 }

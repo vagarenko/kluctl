@@ -1,17 +1,15 @@
 
-import React, { CSSProperties, memo, useCallback } from 'react';
-import { Handle, NodeProps, Position, useReactFlow, Node, Edge, getConnectedEdges, XYPosition } from 'reactflow';
+import React, { CSSProperties, memo, useCallback, useContext } from 'react';
+import { Handle, NodeProps, Position } from 'reactflow';
 import { Box, Typography } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
 import "./nodes.css"
-import { calcLayout } from './layout';
-import { timer } from 'd3-timer';
-import { EXPAND_COLLAPSE_TRANSITION_DURATION, NODE_HANDLE_SIZE, NODE_HEIGHT, NODE_WIDTH } from '../constants';
+import { NODE_HANDLE_SIZE, NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { SxProps } from '@mui/material/styles';
 import { NodeData } from './NodeData';
 import { NodeStatus } from './NodeStatus';
-import { NodeType } from './NodeBuilder';
+import { CommandResultFlowContext } from '../CommandResultFlowContext';
 
 const ICON_STYLE: SxProps = {
     width: NODE_HANDLE_SIZE,
@@ -41,82 +39,17 @@ export interface GenericNodeProps {
 
 export default memo((props: GenericNodeProps) => {
     const { header, body, leftHandleId, rightHandleIds, nodeProps } = props;
-    const { data } = nodeProps;
     const handlesGap = rightHandleIds ? Math.floor(NODE_HEIGHT / (rightHandleIds.length + 1)) : 0;
-    const flow = useReactFlow();
+
+    const {
+        onHandleCollapse,
+        nodesWithCollapsedHandles
+    } = useContext(CommandResultFlowContext)
 
     const onHandleClick = useCallback((handleId: string, collapse: boolean) => (event: React.MouseEvent) => {
         event.stopPropagation();
-
-        const node = flow.getNode(nodeProps.id) as Node<NodeData, NodeType>;
-
-        const collapsedHandles = new Set(node.data.collapsedHandles);
-        if (collapse) {
-            collapsedHandles.add(handleId);
-        } else {
-            collapsedHandles.delete(handleId);
-        }
-
-        const nodes = [
-            ...flow.getNodes().filter(({ id }) => id !== nodeProps.id),
-            {
-                ...node,
-                data: {
-                    ...data,
-                    collapsedHandles
-                }
-            }
-        ] as Node<NodeData, NodeType>[];
-        const edges = flow.getEdges();
-
-        const [childrenNodes, childrenEdges] = getChildrenNodesAndEdgesFromHandle(node, handleId, nodes, edges);
-
-        const childrenNodesIds = new Set(childrenNodes.map(({ id }) => id));
-        const childrenEdgesIds = new Set(childrenEdges.map(({ id }) => id));
-
-        const newEdges = edges.map(e => {
-            if (childrenEdgesIds.has(e.id)) {
-                e.hidden = collapse;
-            }
-            return e;
-        });
-
-        const newNodes = nodes.map(n => {
-            if (childrenNodesIds.has(n.id)) {
-                n.hidden = collapse
-            }
-            return n;
-        });
-
-        const currentLayout: Record<string, XYPosition> = nodes.reduce((acc, { id, position }) => {
-            return {
-                ...acc,
-                [id]: position
-            }
-        }, {});
-        const targetLayout = calcLayout(newNodes, newEdges);
-
-        const t = timer((elapsed) => {
-            if (elapsed > EXPAND_COLLAPSE_TRANSITION_DURATION) {
-                t.stop();
-            }
-            const progress = Math.min(elapsed / EXPAND_COLLAPSE_TRANSITION_DURATION, 1);
-
-            newNodes.forEach((node) => {
-                if (!currentLayout[node.id] || !targetLayout[node.id]) {
-                    return;
-                }
-                node.position = {
-                    x: interpolate(currentLayout[node.id].x, targetLayout[node.id].x, progress),
-                    y: interpolate(currentLayout[node.id].y, targetLayout[node.id].y, progress)
-                }
-            });
-            flow.setNodes(newNodes);
-        });
-
-        flow.setNodes(newNodes);
-        flow.setEdges(newEdges);
-    }, [data, flow, nodeProps.id])
+        onHandleCollapse(nodeProps.id, handleId, collapse);
+    }, [nodeProps.id, onHandleCollapse])
 
     return (
         <Box
@@ -128,7 +61,7 @@ export default memo((props: GenericNodeProps) => {
             textAlign="left"
         >
             <Typography variant="h6" component="div" flex="0 0 auto">
-                {header}
+                {nodeProps.id}: {header}
             </Typography>
             <Typography variant="body1" color="text.secondary" flex="1 1 auto" overflow="hidden">
                 {body}
@@ -166,7 +99,7 @@ export default memo((props: GenericNodeProps) => {
                         }}
                         isConnectable={false}
                     />
-                    {data.collapsedHandles?.has(id)
+                    {nodesWithCollapsedHandles.get(nodeProps.id)?.has(id)
                         ? <AddCircleIcon
                             sx={{
                                 ...ICON_STYLE,
@@ -188,76 +121,3 @@ export default memo((props: GenericNodeProps) => {
         </Box>
     );
 });
-
-function getChildrenNodesAndEdgesFromHandle(
-    node: Node<NodeData, NodeType>,
-    handleId: string,
-    nodes: Node<NodeData, NodeType>[],
-    edges: Edge[]
-): [Node<NodeData, NodeType>[], Edge[]] {
-    const resultNodes: Node<NodeData, NodeType>[] = [];
-    const resultEdges: Edge[] = [];
-
-    const edgesToDirectChildren = getEdgesToDirectChildrenFromHandle(node, handleId, edges)
-
-    const directChildrenIds = new Set<string>();
-    edgesToDirectChildren.forEach(({ target }) => directChildrenIds.add(target));
-    const directChildren = nodes.filter(({ id }) => directChildrenIds.has(id));
-
-    resultEdges.push(...edgesToDirectChildren);
-    resultNodes.push(...directChildren);
-
-    directChildren.forEach((node) => {
-        const [ns, es] = getChildrenNodesAndEdges(node, nodes, edges);
-        resultNodes.push(...ns);
-        resultEdges.push(...es);
-    });
-
-    return [resultNodes, resultEdges]
-}
-
-function getEdgesToDirectChildrenFromHandle(
-    node: Node<NodeData, NodeType>,
-    handleId: string,
-    edges: Edge[]
-): Edge[] {
-    const connectedEdges = getConnectedEdges([node], edges);
-    return connectedEdges
-        .filter(({ source, sourceHandle }) =>
-            source === node.id && sourceHandle === handleId
-        );
-}
-
-function getChildrenNodesAndEdges(
-    node: Node<NodeData, NodeType>,
-    nodes: Node<NodeData, NodeType>[],
-    edges: Edge[]
-): [Node<NodeData, NodeType>[], Edge[]] {
-    const resultNodes: Node<NodeData, NodeType>[] = [];
-    const resultEdges: Edge[] = [];
-
-    const edgesToDirectChildren = getConnectedEdges([node], edges)
-        .filter(({ source, sourceHandle }) => {
-            if (sourceHandle && node.data.collapsedHandles) {
-                return source === node.id && !node.data.collapsedHandles.has(sourceHandle);
-            }
-            return source === node.id;
-        });
-    const directChildrenIds = new Set(edgesToDirectChildren.map(({ target }) => target))
-    const directChildren = nodes.filter(({ id }) => directChildrenIds.has(id))
-
-    resultNodes.push(...directChildren);
-    resultEdges.push(...edgesToDirectChildren);
-
-    directChildren.forEach(n => {
-        const [ns, es] = getChildrenNodesAndEdges(n, nodes, edges);
-        resultNodes.push(...ns);
-        resultEdges.push(...es);
-    });
-
-    return [resultNodes, resultEdges];
-}
-
-function interpolate(a: number, b: number, progress: number): number {
-    return a + (b - a) * progress;
-}
