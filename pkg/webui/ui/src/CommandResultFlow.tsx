@@ -1,8 +1,5 @@
 import {
     Controls,
-    Edge,
-    getConnectedEdges,
-    getOutgoers,
     MiniMap,
     NodeChange,
     NodeMouseHandler,
@@ -11,7 +8,7 @@ import {
     ReactFlow,
     ReactFlowProvider, useReactFlow, useViewport
 } from "reactflow";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Node } from "reactflow";
 import { layoutNodes, runLayoutTransition } from "./nodes/layout";
 import { getResult } from "./api";
@@ -37,8 +34,12 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
     const viewport = useViewport()
 
     useEffect(() => {
+        let cancelled = false;
+
         getResult(props.resultId)
             .then(commandResult => {
+                if (cancelled) { return; }
+
                 const builder = new NodeBuilder(commandResult)
                 const [newNodes, newEdges] = builder.buildRoot()
 
@@ -46,7 +47,11 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
 
                 flow.setNodes(newNodes);
                 flow.setEdges(newEdges);
-            })
+            });
+
+        return () => {
+            cancelled = true;
+        }
     }, [props.resultId, flow]);
 
     const [sidePanelNode, setSidePanelNode] = useState<Node<NodeData, NodeType> | null>(null);
@@ -70,11 +75,7 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
         setActiveFilters(filters);
     }
 
-    useEffect(() => {
-        layoutCallback()
-    }, [activeFilters])
-
-    const layoutCallback = function(followNodeId?: string) {
+    const layoutCallback = useCallback(function (followNodeId?: string) {
         console.log("layoutCallback")
 
         const nodes = flow.getNodes()
@@ -85,11 +86,16 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
         flow.setEdges(edges)
 
         runLayoutTransition(flow, EXPAND_COLLAPSE_TRANSITION_DURATION, followNodeId)
-    }
+    }, [activeFilters, flow])
 
-    const context: CommandResultFlowContextProps = {
-        layoutCallback: layoutCallback,
-    }
+    useEffect(() => {
+        layoutCallback()
+    }, [activeFilters, layoutCallback])
+
+    const context: CommandResultFlowContextProps = useMemo(
+        () => ({ layoutCallback }),
+        [layoutCallback]
+    );
 
     return (
         <CommandResultFlowContext.Provider value={context}>
@@ -113,7 +119,7 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
                         panOnScroll={true}
                         minZoom={0.1}
                     >
-                        <MiniMap nodeColor={"#f00"} zoomable pannable/>
+                        <MiniMap nodeColor={"#f00"} zoomable pannable />
                         <Panel position="top-right">x={viewport.x}, y={viewport.y}, zoom={viewport.zoom}</Panel>
                         <Controls />
                     </ReactFlow>
@@ -127,7 +133,7 @@ const CommandResultFlow = (props: CommandResultFlowProps) => {
 export function CommandResultFlowWithProvider(props: CommandResultFlowProps) {
     return (
         <ReactFlowProvider>
-            <CommandResultFlow resultId={props.resultId}/>
+            <CommandResultFlow resultId={props.resultId} />
         </ReactFlowProvider>
     );
 }

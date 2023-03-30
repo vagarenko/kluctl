@@ -1,5 +1,5 @@
 import { NodeData } from "./NodeData";
-import { Edge, getOutgoers, Node } from 'reactflow';
+import { Edge, Node } from 'reactflow';
 import { NodeStatusField } from "./NodeStatus";
 import { filterNode } from "../CommandResultFlow";
 
