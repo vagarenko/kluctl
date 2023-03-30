@@ -1,6 +1,6 @@
 
-import React, { CSSProperties, memo, useCallback, useContext } from 'react';
-import { Handle, NodeProps, Position } from 'reactflow';
+import React, { CSSProperties, memo, useContext, useState } from 'react';
+import { Handle, NodeProps, Position, useReactFlow } from 'reactflow';
 import { Box, Typography } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleIcon from '@mui/icons-material/RemoveCircle';
@@ -9,7 +9,7 @@ import { NODE_HANDLE_SIZE, NODE_HEIGHT, NODE_WIDTH } from '../constants';
 import { SxProps } from '@mui/material/styles';
 import { NodeData } from './NodeData';
 import { NodeStatus } from './NodeStatus';
-import { CommandResultFlowContext } from '../CommandResultFlowContext';
+import { CommandResultFlowContext } from "../CommandResultFlowContext";
 
 const ICON_STYLE: SxProps = {
     width: NODE_HANDLE_SIZE,
@@ -40,16 +40,34 @@ export interface GenericNodeProps {
 export default memo((props: GenericNodeProps) => {
     const { header, body, leftHandleId, rightHandleIds, nodeProps } = props;
     const handlesGap = rightHandleIds ? Math.floor(NODE_HEIGHT / (rightHandleIds.length + 1)) : 0;
+    const flow = useReactFlow<NodeData>()
+    const context = useContext(CommandResultFlowContext)
 
-    const {
-        onHandleCollapse,
-        nodesWithCollapsedHandles
-    } = useContext(CommandResultFlowContext)
+    const [collapsedHandles, setCollapsedHandles] = useState<string[]>(props.nodeProps.data.collapsedHandles)
 
-    const onHandleClick = useCallback((handleId: string, collapse: boolean) => (event: React.MouseEvent) => {
-        event.stopPropagation();
-        onHandleCollapse(nodeProps.id, handleId, collapse);
-    }, [nodeProps.id, onHandleCollapse])
+    function onHandleCollapse(handleId: string, collapse: boolean): (event: React.MouseEvent) => void {
+        return event => {
+            event.stopPropagation();
+            const nodes = flow.getNodes()
+            const node = nodes.find(n => n.id === props.nodeProps.id)
+            if (node === undefined) {
+                return
+            }
+
+            node.data.collapsedHandles = node.data.collapsedHandles.filter(h => h !== handleId)
+            if (collapse) {
+                console.log("true")
+                node.data.collapsedHandles.push(handleId)
+            } else {
+                console.log("false")
+            }
+            setCollapsedHandles(node.data.collapsedHandles)
+            console.log("onHandleCollapse: id=" + nodeProps.id + "/" + handleId + ", chs=" + JSON.stringify(node.data.collapsedHandles))
+
+            flow.setNodes(nodes)
+            context.layoutCallback(node.id)
+        }
+    }
 
     return (
         <Box
@@ -99,20 +117,20 @@ export default memo((props: GenericNodeProps) => {
                         }}
                         isConnectable={false}
                     />
-                    {nodesWithCollapsedHandles.get(nodeProps.id)?.has(id)
+                    {collapsedHandles.indexOf(id) !== -1
                         ? <AddCircleIcon
                             sx={{
                                 ...ICON_STYLE,
                                 top: handlesGap * (index + 1) - NODE_HANDLE_SIZE / 2,
                             }}
-                            onClick={onHandleClick(id, false)}
+                            onClick={onHandleCollapse(id, false)}
                         />
                         : <RemoveCircleIcon
                             sx={{
                                 ...ICON_STYLE,
                                 top: handlesGap * (index + 1) - NODE_HANDLE_SIZE / 2,
                             }}
-                            onClick={onHandleClick(id, true)}
+                            onClick={onHandleCollapse(id, true)}
                         />
                     }
 

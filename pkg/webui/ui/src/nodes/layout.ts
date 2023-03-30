@@ -1,9 +1,10 @@
 import { timer } from "d3-timer";
 import * as dagre from "dagre";
-import { Edge, Node, Position, XYPosition } from 'reactflow';
+import { Edge, Node, Position, ReactFlowInstance } from 'reactflow';
 import { NODE_HEIGHT, NODE_WIDTH } from "../constants";
+import { NodeData } from "./NodeData";
 
-export const layoutNodes = (nodes: Node<any>[], edges: Edge[]) => {
+export const layoutNodes = (nodes: Node<NodeData>[], edges: Edge[], immediate: boolean) => {
     const dagreGraph = makeDagreGraph(nodes, edges);
 
     nodes.forEach((node) => {
@@ -16,35 +17,25 @@ export const layoutNodes = (nodes: Node<any>[], edges: Edge[]) => {
 
         // We are shifting the dagre node position (anchor=center center) to the top left
         // so it matches the React Flow node anchor point (top left).
-        node.position = {
+        const newPosition = {
             x: nodeWithPosition.x - NODE_WIDTH / 2,
             y: nodeWithPosition.y - NODE_HEIGHT / 2,
         };
-    });
-}
 
-export function calcLayout(nodes: Node<any>[], edges: Edge[]): Layout {
-    const dagreGraph = makeDagreGraph(nodes, edges);
-
-    const res: Record<string, XYPosition> = {};
-    nodes.forEach((node) => {
-        const nodeWithPosition = dagreGraph.node(node.id);
-        if (!nodeWithPosition) {
-            return;
+        if (immediate) {
+            node.position = newPosition
+            node.data.targetPosition = undefined
+        } else {
+            if (node.position === newPosition) {
+                node.data.targetPosition = undefined
+            } else {
+                node.data.targetPosition = newPosition
+            }
         }
-
-        // We are shifting the dagre node position (anchor=center center) to the top left
-        // so it matches the React Flow node anchor point (top left).
-        res[node.id] = {
-            x: nodeWithPosition.x - NODE_WIDTH / 2,
-            y: nodeWithPosition.y - NODE_HEIGHT / 2,
-        };
     });
-
-    return res;
 }
 
-function makeDagreGraph(nodes: Node<any>[], edges: Edge[]): dagre.graphlib.Graph<any> {
+function makeDagreGraph(nodes: Node<NodeData>[], edges: Edge[]): dagre.graphlib.Graph<any> {
     const dagreGraph = new dagre.graphlib.Graph();
     dagreGraph.setDefaultEdgeLabel(() => ({}));
 
@@ -66,23 +57,10 @@ function makeDagreGraph(nodes: Node<any>[], edges: Edge[]): dagre.graphlib.Graph
     return dagreGraph;
 }
 
-export type Layout = Record<string, XYPosition>
-
-export function getCurrentLayout(nodes: Node[]): Layout {
-    return nodes.reduce((acc, { id, position }) => {
-        return {
-            ...acc,
-            [id]: position
-        }
-    }, {});
-}
-
 export function runLayoutTransition(
-    nodes: Node[],
-    currentLayout: Layout,
-    targetLayout: Layout,
+    flow: ReactFlowInstance<NodeData>,
     duration: number,
-    updateNodesCallback: (nodes: Node[]) => void
+    followNodeId?: string
 ): void {
     const t = timer((elapsed) => {
         if (elapsed > duration) {
@@ -90,16 +68,36 @@ export function runLayoutTransition(
         }
         const progress = Math.min(elapsed / duration, 1);
 
+        const nodes = flow.getNodes()
+
         nodes.forEach((node) => {
-            if (!currentLayout[node.id] || !targetLayout[node.id]) {
-                return;
+            if (node.data.targetPosition === undefined) {
+                return
             }
+            const oldPosition = node.position
             node.position = {
-                x: interpolate(currentLayout[node.id].x, targetLayout[node.id].x, progress),
-                y: interpolate(currentLayout[node.id].y, targetLayout[node.id].y, progress)
+                x: interpolate(node.position.x, node.data.targetPosition.x, progress),
+                y: interpolate(node.position.y, node.data.targetPosition.y, progress)
+            }
+            if (node.position === node.data.targetPosition) {
+                node.data.targetPosition = undefined
+            }
+
+            if (node.id === followNodeId) {
+                const delta = {
+                    x: oldPosition.x - node.position.x,
+                    y: oldPosition.y - node.position.y,
+                }
+                const newViewport = {
+                    x: flow.getViewport().x + delta.x * flow.getZoom(),
+                    y: flow.getViewport().y + delta.y * flow.getZoom(),
+                    zoom: flow.getViewport().zoom
+                }
+                flow.setViewport(newViewport)
             }
         });
-        updateNodesCallback(nodes);
+
+        flow.setNodes(nodes)
     });
 }
 

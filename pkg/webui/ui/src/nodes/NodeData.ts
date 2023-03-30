@@ -1,4 +1,5 @@
 import { ChangedObject, DeploymentError, ObjectRef } from "../models";
+import { XYPosition } from "reactflow";
 
 export class DiffStatus  {
     newObjects: ObjectRef[] = [];
@@ -52,7 +53,9 @@ export class HealthStatus {
 export abstract class NodeData {
     healthStatus?: HealthStatus;
     diffStatus?: DiffStatus;
-    collapsedHandles?: Set<string>;
+
+    collapsedHandles: string[] = [];
+    targetPosition?: XYPosition
 
     protected constructor(hasHealthStatus: boolean, hasDiffStatus: boolean) {
         if (hasHealthStatus) {
