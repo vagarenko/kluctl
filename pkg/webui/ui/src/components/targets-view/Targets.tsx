@@ -1,13 +1,13 @@
 import { KluctlDeploymentInfo } from "../../models";
 import { ActionMenuItem, ActionsMenu } from "../ActionsMenu";
 import { Box, Typography, useTheme } from "@mui/material";
-import React from "react";
+import React, { useContext } from "react";
 import Tooltip from "@mui/material/Tooltip";
 import { Favorite, HeartBroken, PublishedWithChanges } from "@mui/icons-material";
-import { api } from "../../api";
 import { CpuIcon, FingerScanIcon, MessageQuestionIcon, TargetIcon } from "../../icons/Icons";
 import { ProjectSummary, TargetSummary } from "../../project-summaries";
 import { calcAgo } from "../../utils/duration";
+import { ApiContext } from "../App";
 import { CardPaper } from "./Card";
 
 const StatusIcon = (props: { ps: ProjectSummary, ts: TargetSummary }) => {
@@ -55,6 +55,7 @@ const StatusIcon = (props: { ps: ProjectSummary, ts: TargetSummary }) => {
 }
 
 export const TargetItem = (props: { ps: ProjectSummary, ts: TargetSummary, onSelectTarget: (ts?: TargetSummary) => void }) => {
+    const api = useContext(ApiContext)
     const actionMenuItems: ActionMenuItem[] = []
 
     actionMenuItems.push({
